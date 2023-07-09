@@ -27,6 +27,12 @@ CONFIG_PART_FAMILY := "STM32L4"
 
 include $(ST_HAL_DIR)/devices/STM32L4/Makefile
 
+else ifneq ($(findstring STM32U5,$(CONFIG_DEVICE)),)
+
+CONFIG_PART_FAMILY := "STM32U5"
+
+include $(ST_HAL_DIR)/devices/STM32U5/Makefile
+
 else
 $(error Unsupported device)
 endif

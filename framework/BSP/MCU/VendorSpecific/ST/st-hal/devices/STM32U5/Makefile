@@ -1,7 +1,7 @@
 ifneq ($(findstring STM32U5A5,$(CONFIG_DEVICE)),)
 PREPROCESSOR_MACROS += STM32U5A5xx
 else ifneq ($(findstring STM32U585,$(CONFIG_DEVICE)),)
-PREPROCESSOR_MACROS += STM32U5A5xx
+PREPROCESSOR_MACROS += STM32U585xx
 else
 $(error Unsupported device)
 endif

@@ -1,4 +1,10 @@
-PREPROCESSOR_MACROS += STM32U5xx
+ifneq ($(findstring STM32U5A5,$(CONFIG_DEVICE)),)
+PREPROCESSOR_MACROS += STM32U5A5xx
+else ifneq ($(findstring STM32U585,$(CONFIG_DEVICE)),)
+PREPROCESSOR_MACROS += STM32U5A5xx
+else
+$(error Unsupported device)
+endif
 
 CONFIG_CPU_CORTEX_M33 := y
 

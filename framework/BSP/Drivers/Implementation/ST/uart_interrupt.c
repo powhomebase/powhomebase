@@ -28,6 +28,7 @@
 #include <stm32u5xx_ll_usart.h>
 #endif
 #include <global.h>
+#include <proj_assert.h>
 #include <syscalls.h>
 
 /**********************************************************************************************************************/

@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/framework/OS/CMSIS_OS/Include",
+                "${workspaceFolder}/framework/OS/RTX/Include",
+                "${workspaceFolder}/framework/OS/Wrappers",
+                "${workspaceFolder}/framework/OS/Wrappers/Syscalls",
+                "${workspaceFolder}/framework/BSP/Drivers/API",
+                "${workspaceFolder}/framework/BSP/Drivers/Implementation/ST",
+                "${workspaceFolder}/framework/BSP/MCU/CMSIS/Core",
+                "${workspaceFolder}/framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/Device/Include",
+                "${workspaceFolder}/framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/HAL/Config",
+                "${workspaceFolder}/framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/HAL/Inc",
+                "${workspaceFolder}/src/OS/Config"
+            ],
+            "defines": [
+                "CMSIS_device_header=\"stm32u5xx.h\"",
+                "STM32U5A5xx",
+                "STM32U5"
+            ],
+            "compilerPath": "/opt/gcc-arm-none-eabi-8-2019-q3-update/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-arm"
+        }
+    ],
+    "version": 4
+}

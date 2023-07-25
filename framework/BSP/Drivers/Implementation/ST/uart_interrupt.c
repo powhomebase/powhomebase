@@ -23,6 +23,9 @@
 #elif defined(STM32WL)
 #include <stm32wlxx_hal_uart.h>
 #include <stm32wlxx_ll_usart.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_hal_uart.h>
+#include <stm32u5xx_ll_usart.h>
 #endif
 #include <global.h>
 #include <syscalls.h>
@@ -92,7 +95,7 @@ int32_t uart_int_Initialize(uart_int_resources_t *p_this, ARM_USART_SignalEvent_
     p_this->base.uart_handle.Init.HwFlowCtl = p_this->user_conf->hw_control;
 
     /* Set UART advanced features struct */
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5) 
     /* Set UART one bit sampling flag */
     p_this->base.uart_handle.Init.OneBitSampling = p_this->user_conf->one_bit_sampling;
 

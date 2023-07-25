@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}",
+                "${workspaceFolder}/mocks",
                 "${workspaceFolder}/framework/OS/CMSIS_OS/Include",
                 "${workspaceFolder}/framework/OS/RTX/Include",
                 "${workspaceFolder}/framework/OS/Wrappers",

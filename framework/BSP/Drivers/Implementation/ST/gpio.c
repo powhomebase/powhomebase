@@ -28,6 +28,12 @@
 #include <stm32wlxx_hal_gpio.h>
 #include <stm32wlxx_hal_rcc.h>
 #include <stm32wlxx_ll_exti.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_hal_gpio.h>
+#include <stm32u5xx_hal_rcc.h>
+#include <stm32u5xx_ll_exti.h>
+#else
+#error "MCU not chosen"
 #endif
 
 /**********************************************************************************************************************/
@@ -94,6 +100,73 @@ static void gpio_nvic_enable_irq(bool enable);
  **********************************************************************************************************************/
 int32_t gpio_initialize(void)
 {
+#if defined(STM32U5)
+if (gpio_conf.exti15_irq_enable)
+{
+    proj_assert(gpio_conf.exti15_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI5_IRQn, gpio_conf.exti15_irq_priority);
+}
+
+if (gpio_conf.exti14_irq_enable)
+{
+    proj_assert(gpio_conf.exti14_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI4_IRQn, gpio_conf.exti14_irq_priority);
+}
+
+if (gpio_conf.exti13_irq_enable)
+{
+    proj_assert(gpio_conf.exti13_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI3_IRQn, gpio_conf.exti13_irq_priority);
+}
+
+if (gpio_conf.exti12_irq_enable)
+{
+    proj_assert(gpio_conf.exti12_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI2_IRQn, gpio_conf.exti12_irq_priority);
+}
+
+if (gpio_conf.exti11_irq_enable)
+{
+    proj_assert(gpio_conf.exti11_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI1_IRQn, gpio_conf.exti11_irq_priority);
+}
+
+if (gpio_conf.exti10_irq_enable)
+{
+    proj_assert(gpio_conf.exti10_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI0_IRQn, gpio_conf.exti10_irq_priority);
+}
+
+if (gpio_conf.exti9_irq_enable)
+{
+    proj_assert(gpio_conf.exti9_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI9_IRQn, gpio_conf.exti9_irq_priority);
+}
+
+if (gpio_conf.exti8_irq_enable)
+{
+    proj_assert(gpio_conf.exti8_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI8_IRQn, gpio_conf.exti8_irq_priority);
+}
+
+if (gpio_conf.exti7_irq_enable)
+{
+    proj_assert(gpio_conf.exti7_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI7_IRQn, gpio_conf.exti7_irq_priority);
+}
+
+if (gpio_conf.exti6_irq_enable)
+{
+    proj_assert(gpio_conf.exti6_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI6_IRQn, gpio_conf.exti6_irq_priority);
+}
+
+if (gpio_conf.exti5_irq_enable)
+{
+    proj_assert(gpio_conf.exti5_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
+    nvic_set_priority(EXTI5_IRQn, gpio_conf.exti5_irq_priority);
+}
+#else
     if (gpio_conf.exti15_10_irq_enable)
     {
         proj_assert(gpio_conf.exti15_10_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
@@ -106,6 +179,7 @@ int32_t gpio_initialize(void)
         nvic_set_priority(EXTI9_5_IRQn, gpio_conf.exti9_5_irq_priority);
     }
 
+#endif
     if (gpio_conf.exti4_irq_enable)
     {
         proj_assert(gpio_conf.exti4_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
@@ -884,8 +958,22 @@ static int32_t gpio_set_swd(bool enable)
  **********************************************************************************************************************/
 static void gpio_nvic_clear_irq(void)
 {
+#if defined(STM32U5)
+    nvic_clear_irq(EXTI15_IRQn);
+    nvic_clear_irq(EXTI14_IRQn);
+    nvic_clear_irq(EXTI13_IRQn);
+    nvic_clear_irq(EXTI12_IRQn);
+    nvic_clear_irq(EXTI11_IRQn);
+    nvic_clear_irq(EXTI10_IRQn);
+    nvic_clear_irq(EXTI9_IRQn);
+    nvic_clear_irq(EXTI8_IRQn);
+    nvic_clear_irq(EXTI7_IRQn);
+    nvic_clear_irq(EXTI6_IRQn);
+    nvic_clear_irq(EXTI5_IRQn);
+#else
     nvic_clear_irq(EXTI15_10_IRQn);
     nvic_clear_irq(EXTI9_5_IRQn);
+#endif
     nvic_clear_irq(EXTI4_IRQn);
     nvic_clear_irq(EXTI3_IRQn);
     nvic_clear_irq(EXTI2_IRQn);
@@ -899,8 +987,22 @@ static void gpio_nvic_clear_irq(void)
  **********************************************************************************************************************/
 static void gpio_nvic_enable_irq(bool enable)
 {
+#if defined(STM32U5)
+    nvic_enable_irq(EXTI15_IRQn, gpio_conf.exti15_irq_enable && enable);
+    nvic_enable_irq(EXTI14_IRQn, gpio_conf.exti14_irq_enable && enable);
+    nvic_enable_irq(EXTI13_IRQn, gpio_conf.exti13_irq_enable && enable);
+    nvic_enable_irq(EXTI12_IRQn, gpio_conf.exti12_irq_enable && enable);
+    nvic_enable_irq(EXTI11_IRQn, gpio_conf.exti11_irq_enable && enable);
+    nvic_enable_irq(EXTI10_IRQn, gpio_conf.exti10_irq_enable && enable);
+    nvic_enable_irq(EXTI9_IRQn, gpio_conf.exti9_irq_enable && enable);
+    nvic_enable_irq(EXTI8_IRQn, gpio_conf.exti8_irq_enable && enable);
+    nvic_enable_irq(EXTI7_IRQn, gpio_conf.exti7_irq_enable && enable);
+    nvic_enable_irq(EXTI6_IRQn, gpio_conf.exti6_irq_enable && enable);
+    nvic_enable_irq(EXTI5_IRQn, gpio_conf.exti5_irq_enable && enable);
+#else
     nvic_enable_irq(EXTI15_10_IRQn, gpio_conf.exti15_10_irq_enable && enable);
     nvic_enable_irq(EXTI9_5_IRQn, gpio_conf.exti9_5_irq_enable && enable);
+#endif
     nvic_enable_irq(EXTI4_IRQn, gpio_conf.exti4_irq_enable && enable);
     nvic_enable_irq(EXTI3_IRQn, gpio_conf.exti3_irq_enable && enable);
     nvic_enable_irq(EXTI2_IRQn, gpio_conf.exti2_irq_enable && enable);
@@ -910,9 +1012,40 @@ static void gpio_nvic_enable_irq(bool enable)
 
 /***********************************************************************************************************************
  * Internal use (IRQ)
- ***********************************************************************************************************************
+ **********************************************************************************************************************/
 
- **********************************************************************************************************************
+#if defined(STM32U5)
+/***********************************************************************************************************************
+ * Description : GPIO IRQHandler for the EXTI line that caused the interrupt (called from HAL_GPIO_EXTI_IRQHandler)
+ * Input       : pin - GPIO pin number
+ **********************************************************************************************************************/
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t pin)
+{
+    ARM_GPIO_Interrupt_t handler = gpio_handlers[get_gpio_pos(pin)];
+
+    if (handler != NULL)
+    {
+        handler();
+    }
+}
+
+/***********************************************************************************************************************
+ * Description : GPIO IRQHandler for the EXTI line that caused the interrupt (called from HAL_GPIO_EXTI_IRQHandler)
+ * Input       : pin - GPIO pin number
+ **********************************************************************************************************************/
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t pin)
+{
+    ARM_GPIO_Interrupt_t handler = gpio_handlers[get_gpio_pos(pin)];
+
+    if (handler != NULL)
+    {
+        handler();
+    }
+}
+
+#else
+
+/***********************************************************************************************************************
  * Description : GPIO IRQHandler for the EXTI line that caused the interrupt (called from HAL_GPIO_EXTI_IRQHandler)
  * Input       : pin - GPIO pin number
  **********************************************************************************************************************/
@@ -925,6 +1058,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t pin)
         handler();
     }
 }
+#endif
 
 /***********************************************************************************************************************
  * Description : handle EXTI0 IRQ
@@ -966,6 +1100,97 @@ void EXTI4_IRQHandler(void)
     HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
 }
 
+#if defined(STM32U5)
+/***********************************************************************************************************************
+ * Description : handle EXTI5 IRQ
+ **********************************************************************************************************************/
+void EXTI5_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI6 IRQ
+ **********************************************************************************************************************/
+void EXTI6_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI7 IRQ
+ **********************************************************************************************************************/
+void EXTI7_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI8 IRQ
+ **********************************************************************************************************************/
+void EXTI8_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI9 IRQ
+ **********************************************************************************************************************/
+void EXTI9_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_9);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI10 IRQ
+ **********************************************************************************************************************/
+void EXTI10_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_10);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI11 IRQ
+ **********************************************************************************************************************/
+void EXTI11_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI12 IRQ
+ **********************************************************************************************************************/
+void EXTI12_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI13 IRQ
+ **********************************************************************************************************************/
+void EXTI13_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI14 IRQ
+ **********************************************************************************************************************/
+void EXTI14_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_14);
+}
+
+/***********************************************************************************************************************
+ * Description : handle EXTI15 IRQ
+ **********************************************************************************************************************/
+void EXTI15_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_15);
+}
+
+#else
+
 /***********************************************************************************************************************
  * Description : handle EXTI5-9 IRQ
  **********************************************************************************************************************/
@@ -989,3 +1214,4 @@ void EXTI15_10_IRQHandler(void)
         HAL_GPIO_EXTI_IRQHandler(line_index);
     }
 }
+#endif

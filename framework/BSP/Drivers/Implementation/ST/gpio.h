@@ -43,10 +43,35 @@ typedef struct gpio_pin_obj {
 } gpio_pin_obj_t;
 
 typedef struct {
+#if defined(STM32U5)
+    bool     exti15_irq_enable;
+    uint32_t exti15_irq_priority;
+    bool     exti14_irq_enable;
+    uint32_t exti14_irq_priority;
+    bool     exti13_irq_enable;
+    uint32_t exti13_irq_priority;
+    bool     exti12_irq_enable;
+    uint32_t exti12_irq_priority;
+    bool     exti11_irq_enable;
+    uint32_t exti11_irq_priority;
+    bool     exti10_irq_enable;
+    uint32_t exti10_irq_priority;
+    bool     exti9_irq_enable;
+    uint32_t exti9_irq_priority;
+    bool     exti8_irq_enable;
+    uint32_t exti8_irq_priority;
+    bool     exti7_irq_enable;
+    uint32_t exti7_irq_priority;
+    bool     exti6_irq_enable;
+    uint32_t exti6_irq_priority;
+    bool     exti5_irq_enable;
+    uint32_t exti5_irq_priority;    
+#else
     bool     exti15_10_irq_enable;
     uint32_t exti15_10_irq_priority;
     bool     exti9_5_irq_enable;
     uint32_t exti9_5_irq_priority;
+#endif
     bool     exti4_irq_enable;
     uint32_t exti4_irq_priority;
     bool     exti3_irq_enable;

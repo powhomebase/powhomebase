@@ -9,8 +9,6 @@
 
 /* Project Related */
 #include <Driver_Flash.h>
-#include <global.h>
-#include <os.h>
 #include CMSIS_device_header
 
 /* Libraries */
@@ -25,15 +23,15 @@
  **********************************************************************************************************************/
 #define INTERNAL_FLASH_GENERATE_OBJECT()                                                                               \
     ARM_DRIVER_FLASH Driver_Flash = {                                                                                  \
-        internal_flash_Initialize,                                                                                     \
-        internal_flash_Uninitialize,                                                                                   \
-        internal_flash_PowerControl,                                                                                   \
-        internal_flash_ReadData,                                                                                       \
-        internal_flash_ProgramData,                                                                                    \
-        internal_flash_EraseSector,                                                                                    \
-        internal_flash_EraseChip,                                                                                      \
-        internal_flash_GetStatus,                                                                                      \
-        internal_flash_GetInfo,                                                                                        \
+        .Initialize   = internal_flash_Initialize,                                                                                     \
+        .Uninitialize = internal_flash_Uninitialize,                                                                                   \
+        .PowerControl = internal_flash_PowerControl,                                                                                   \
+        .ReadData     = internal_flash_ReadData,                                                                                       \
+        .ProgramData  = internal_flash_ProgramData,                                                                                    \
+        .EraseSector  = internal_flash_EraseSector,                                                                                    \
+        .EraseChip    = internal_flash_EraseChip,                                                                                      \
+        .GetStatus    = internal_flash_GetStatus,                                                                                      \
+        .GetInfo      = internal_flash_GetInfo,                                                                                        \
     }
 
 /**********************************************************************************************************************/

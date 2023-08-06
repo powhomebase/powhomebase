@@ -25,6 +25,7 @@ $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_crc.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_dac_ex.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_dac.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_dma.c \
+$(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_dma_ex.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_exti.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_flash_ex.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_flash.c \

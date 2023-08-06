@@ -314,7 +314,7 @@ int32_t spi_dma_Receive(spi_dma_resources_t* p_this, void* data, uint32_t num)
     proj_assert(num < (uint32_t)UINT16_MAX);
 
     /* Flush receive queue before starting transfer */
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5) //FIXME: is necessary?
     HAL_SPIEx_FlushRxFifo(&p_this->spi_handle);
 #endif
 
@@ -380,7 +380,7 @@ int32_t spi_dma_Transfer(spi_dma_resources_t* p_this, const void* data_out, void
     proj_assert(num < (uint32_t)UINT16_MAX);
 
     /* Flush receive queue before starting transfer */
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL)  || defined(STM32U5) //FIXME: is necessary?
     HAL_SPIEx_FlushRxFifo(&p_this->spi_handle);
 #endif
 

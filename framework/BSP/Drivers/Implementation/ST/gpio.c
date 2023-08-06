@@ -104,37 +104,37 @@ int32_t gpio_initialize(void)
 if (gpio_conf.exti15_irq_enable)
 {
     proj_assert(gpio_conf.exti15_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI5_IRQn, gpio_conf.exti15_irq_priority);
+    nvic_set_priority(EXTI15_IRQn, gpio_conf.exti15_irq_priority);
 }
 
 if (gpio_conf.exti14_irq_enable)
 {
     proj_assert(gpio_conf.exti14_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI4_IRQn, gpio_conf.exti14_irq_priority);
+    nvic_set_priority(EXTI14_IRQn, gpio_conf.exti14_irq_priority);
 }
 
 if (gpio_conf.exti13_irq_enable)
 {
     proj_assert(gpio_conf.exti13_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI3_IRQn, gpio_conf.exti13_irq_priority);
+    nvic_set_priority(EXTI13_IRQn, gpio_conf.exti13_irq_priority);
 }
 
 if (gpio_conf.exti12_irq_enable)
 {
     proj_assert(gpio_conf.exti12_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI2_IRQn, gpio_conf.exti12_irq_priority);
+    nvic_set_priority(EXTI12_IRQn, gpio_conf.exti12_irq_priority);
 }
 
 if (gpio_conf.exti11_irq_enable)
 {
     proj_assert(gpio_conf.exti11_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI1_IRQn, gpio_conf.exti11_irq_priority);
+    nvic_set_priority(EXTI11_IRQn, gpio_conf.exti11_irq_priority);
 }
 
 if (gpio_conf.exti10_irq_enable)
 {
     proj_assert(gpio_conf.exti10_irq_priority < HIGHEST_PREEMPT_PRIORITY_VALUE);
-    nvic_set_priority(EXTI0_IRQn, gpio_conf.exti10_irq_priority);
+    nvic_set_priority(EXTI10_IRQn, gpio_conf.exti10_irq_priority);
 }
 
 if (gpio_conf.exti9_irq_enable)

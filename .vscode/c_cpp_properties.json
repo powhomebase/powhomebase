@@ -19,7 +19,7 @@
             ],
             "defines": [
                 "CMSIS_device_header=\"stm32u5xx.h\"",
-                "STM32U5A5xx",
+                "STM32U585xx",
                 "STM32U5"
             ],
             "compilerPath": "/opt/gcc-arm-none-eabi-8-2019-q3-update/bin/arm-none-eabi-gcc",

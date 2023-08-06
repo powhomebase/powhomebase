@@ -164,7 +164,7 @@ typedef const struct {
 
     IRQn_Type irq; /* UART IRQ Handler */
 
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5) 
     uint32_t                    one_bit_sampling; /* One bit sampling enable */
     UART_AdvFeatureInitTypeDef *advanced_features;
 #endif

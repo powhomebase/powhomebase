@@ -30,6 +30,7 @@ $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_flash_ex.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_flash.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_gpio.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_i2c.c \
+$(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_icache.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_irda.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_iwdg.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_pwr.c \

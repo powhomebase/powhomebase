@@ -33,6 +33,7 @@ $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_i2c.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_icache.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_irda.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_iwdg.c \
+$(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_ospi.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_pwr.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_pwr_ex.c \
 $(ST_HAL_DIR)/devices/STM32U5/HAL/Src/stm32u5xx_hal_rcc_ex.c \

@@ -10,16 +10,25 @@
 #include "dma.h"
 
 /* Project Related */
-#include <cmsis_os.h>
 #include <global.h>
 #include <proj_exception.h>
 #include <syscalls.h>
+#include <proj_assert.h>
 
 /**********************************************************************************************************************/
 /* Macros                                                                                                             */
 /**********************************************************************************************************************/
 
-#define DMA_MAX_SEMAPHORE_VALUE (7)
+/* L4,F4 and WL devices has 2 equal blocks of DMA, each one with 8 channels. U5 has 2 blocks of DMA, the GPDMA and
+   LPDMA. In order to keep terminology conventions, to GPDMA we will refer as block1 and to LPDMA as block2  */
+#if defined(STM32U5)
+#define DMA1_MAX_SEMAPHORE_VALUE (15)
+#define DMA2_MAX_SEMAPHORE_VALUE (3)
+#else
+#define DMA1_MAX_SEMAPHORE_VALUE (7)
+#define DMA2_MAX_SEMAPHORE_VALUE (7)
+#endif
+
 
 /**********************************************************************************************************************/
 /* Private Functions Declarations                                                                                     */
@@ -51,10 +60,10 @@ int32_t dma_Initialize(dma_resources_t* p_this, ARM_DMA_SignalEvent_t cb_event)
     if (!p_this->sems_created)
     {
         p_this->sems_created = true;
-        p_this->block1_sem = osSemaphoreNew(DMA_MAX_SEMAPHORE_VALUE, DMA_MAX_SEMAPHORE_VALUE, &p_this->block1_sem_attr);
+        p_this->block1_sem = osSemaphoreNew(DMA1_MAX_SEMAPHORE_VALUE, DMA1_MAX_SEMAPHORE_VALUE, &p_this->block1_sem_attr);
         proj_assert(p_this->block1_sem != NULL);
 
-        p_this->block2_sem = osSemaphoreNew(DMA_MAX_SEMAPHORE_VALUE, DMA_MAX_SEMAPHORE_VALUE, &p_this->block2_sem_attr);
+        p_this->block2_sem = osSemaphoreNew(DMA2_MAX_SEMAPHORE_VALUE, DMA2_MAX_SEMAPHORE_VALUE, &p_this->block2_sem_attr);
         proj_assert(p_this->block2_sem != NULL);
     }
 
@@ -219,8 +228,8 @@ static void dma_clock_enable(dma_resources_t* p_this)
 {
 #if defined(DMAMUX1)
     /* Enable the DMAMUX at the first time we need a DMA */
-    if ((osSemaphoreGetCount(p_this->block1_sem) == DMA_MAX_SEMAPHORE_VALUE)
-        && (osSemaphoreGetCount(p_this->block2_sem) == DMA_MAX_SEMAPHORE_VALUE))
+    if ((osSemaphoreGetCount(p_this->block1_sem) == DMA1_MAX_SEMAPHORE_VALUE)
+        && (osSemaphoreGetCount(p_this->block2_sem) == DMA2_MAX_SEMAPHORE_VALUE))
     {
         dmamux_clock_enable();
     }
@@ -231,12 +240,17 @@ static void dma_clock_enable(dma_resources_t* p_this)
         /* Is it the first channel in the block */
         int32_t this_block_active_channels = osSemaphoreGetCount(p_this->block1_sem);
 
-        if (this_block_active_channels == DMA_MAX_SEMAPHORE_VALUE)
+        if (this_block_active_channels == DMA1_MAX_SEMAPHORE_VALUE)
         {
             /* if it is the first channel in the block activate block */
+#if defined(__HAL_RCC_GPDMA1_CLK_ENABLE)
+            __HAL_RCC_GPDMA1_CLK_ENABLE();
+            __HAL_RCC_GPDMA1_CLK_SLEEP_ENABLE();
+#else
             __HAL_RCC_DMA1_CLK_ENABLE();
 #if defined(__HAL_RCC_DMA1_CLK_SLEEP_ENABLE)
             __HAL_RCC_DMA1_CLK_SLEEP_ENABLE();
+#endif
 #endif
         }
 
@@ -250,12 +264,17 @@ static void dma_clock_enable(dma_resources_t* p_this)
         /* Is it the first channel in the block */
         int32_t this_block_active_channels = osSemaphoreGetCount(p_this->block2_sem);
 
-        if (this_block_active_channels == DMA_MAX_SEMAPHORE_VALUE)
+        if (this_block_active_channels == DMA2_MAX_SEMAPHORE_VALUE)
         {
+#if defined(__HAL_RCC_LPDMA1_CLK_ENABLE)
+            __HAL_RCC_LPDMA1_CLK_ENABLE();
+            __HAL_RCC_LPDMA1_CLK_SLEEP_ENABLE();
+#else
             /* if it is the first channel in the block activate block */
             __HAL_RCC_DMA2_CLK_ENABLE();
 #if defined(__HAL_RCC_DMA2_CLK_SLEEP_ENABLE)
             __HAL_RCC_DMA2_CLK_SLEEP_ENABLE();
+#endif
 #endif
         }
 
@@ -283,12 +302,17 @@ static void dma_clock_disable(dma_resources_t* p_this)
         /* Is it the last channel in the block */
         int32_t this_block_active_channels = osSemaphoreGetCount(p_this->block1_sem);
 
-        if (this_block_active_channels == DMA_MAX_SEMAPHORE_VALUE)
+        if (this_block_active_channels == DMA1_MAX_SEMAPHORE_VALUE)
         {
             /* if it was the last channel in the block deactivate block */
+#if defined(__HAL_RCC_GPDMA1_CLK_DISABLE)
+            __HAL_RCC_GPDMA1_CLK_DISABLE();
+            __HAL_RCC_GPDMA1_CLK_SLEEP_DISABLE();
+#else
             __HAL_RCC_DMA1_CLK_DISABLE();
 #if defined(__HAL_RCC_DMA1_CLK_SLEEP_DISABLE)
             __HAL_RCC_DMA1_CLK_SLEEP_DISABLE();
+#endif
 #endif
         }
     }
@@ -302,20 +326,25 @@ static void dma_clock_disable(dma_resources_t* p_this)
         /* Is it the last channel in the block */
         int32_t this_block_active_channels = osSemaphoreGetCount(p_this->block2_sem);
 
-        if (this_block_active_channels == DMA_MAX_SEMAPHORE_VALUE)
+        if (this_block_active_channels == DMA2_MAX_SEMAPHORE_VALUE)
         {
             /* if it was the last channel in the block deactivate block */
+#if defined(__HAL_RCC_LPDMA1_CLK_DISABLE)
+            __HAL_RCC_LPDMA1_CLK_DISABLE();
+            __HAL_RCC_LPDMA1_CLK_SLEEP_DISABLE();
+#else
             __HAL_RCC_DMA2_CLK_DISABLE();
 #if defined(__HAL_RCC_DMA2_CLK_SLEEP_DISABLE)
             __HAL_RCC_DMA2_CLK_SLEEP_DISABLE();
+#endif
 #endif
         }
     }
 
 #if defined(DMAMUX1)
     /* Disable the DMAMUX only if we do not use any DMA channel */
-    if ((osSemaphoreGetCount(p_this->block1_sem) == DMA_MAX_SEMAPHORE_VALUE)
-        && (osSemaphoreGetCount(p_this->block2_sem) == DMA_MAX_SEMAPHORE_VALUE))
+    if ((osSemaphoreGetCount(p_this->block1_sem) == DMA1_MAX_SEMAPHORE_VALUE)
+        && (osSemaphoreGetCount(p_this->block2_sem) == DMA2_MAX_SEMAPHORE_VALUE))
     {
         dmamux_clock_disable();
     }

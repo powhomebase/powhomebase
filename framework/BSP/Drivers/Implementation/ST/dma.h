@@ -33,7 +33,7 @@
 /* Project Related */
 #include CMSIS_device_header
 #include <Driver_DMA.h>
-#include <cmsis_os.h>
+#include <cmsis_os2.h>
 
 /**********************************************************************************************************************/
 /* Macros                                                                                                             */

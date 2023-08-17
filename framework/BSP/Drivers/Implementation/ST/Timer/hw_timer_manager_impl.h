@@ -131,6 +131,8 @@
  *                    // Handle DAC underrun irq below/above
  *                }
  *
+ *              For STM32U5 this headache doesn't exist, each peripheral has it's own IRQ_Handler!
+ *
  * Simply copy the relevant template, to your objs file and uncomment it.
  **********************************************************************************************************************/
 #pragma once
@@ -166,8 +168,10 @@
 #define _HAL_DBGMCU_FREEZE_TIMER(num_)   __HAL_DBGMCU_FREEZE_TIM##num_()
 #define _HAL_DBGMCU_UNFREEZE_TIMER(num_) __HAL_DBGMCU_UNFREEZE_TIM##num_()
 #else
-#define _HAL_DBGMCU_FREEZE_TIMER(num_)   {}
-#define _HAL_DBGMCU_UNFREEZE_TIMER(num_) {}
+#define _HAL_DBGMCU_FREEZE_TIMER(num_)                                                                                 \
+    {}
+#define _HAL_DBGMCU_UNFREEZE_TIMER(num_)                                                                               \
+    {}
 #endif
 
 #define HW_TIMER_MANAGER_CLOCK_CONTROL_DEFINE(num_)                                                                    \
@@ -266,12 +270,12 @@ typedef struct {
     hw_timer_manager_clock_control_t clock_disable;
     hw_timer_manager_clock_control_t nvic_enable;
     hw_timer_manager_clock_control_t nvic_disable;
-    TIM_TypeDef *                    p_instance;
+    TIM_TypeDef*                     p_instance;
 } const hw_timer_manager_impl_conf_t;
 
 typedef struct {
     hw_timer_manager_t                  _base;
-    hw_timer_manager_impl_conf_t *const _p_conf;
+    hw_timer_manager_impl_conf_t* const _p_conf;
 } hw_timer_manager_impl_t;
 
 /* Defines bitmap shift of STM32 specific events */
@@ -302,16 +306,16 @@ extern hw_timer_manager_methods_t const hw_timer_manager_impl_m;
 /* ------------------------------------- IRQ Handlers ----------------------------------------------------------------*/
 
 /* General TIMn IRQ handler */
-void hw_timer_manager_irq(hw_timer_manager_impl_t *p_this);
+void hw_timer_manager_irq(hw_timer_manager_impl_t* p_this);
 
 /* Timer 1/8 IRQ handler - Break IRQs */
-void hw_timer_manager_irq_brk(hw_timer_manager_impl_t *p_this);
+void hw_timer_manager_irq_brk(hw_timer_manager_impl_t* p_this);
 
 /* Timer 1/8 IRQ handler - Up IRQs */
-void hw_timer_manager_irq_up(hw_timer_manager_impl_t *p_this);
+void hw_timer_manager_irq_up(hw_timer_manager_impl_t* p_this);
 
 /* Timer 1/8 IRQ handler - Trigger and COM IRQs */
-void hw_timer_manager_irq_trg_com(hw_timer_manager_impl_t *p_this);
+void hw_timer_manager_irq_trg_com(hw_timer_manager_impl_t* p_this);
 
 /* Timer 1/8 IRQ handler - Capture Compare IRQs */
-void hw_timer_manager_irq_cc(hw_timer_manager_impl_t *p_this);
+void hw_timer_manager_irq_cc(hw_timer_manager_impl_t* p_this);

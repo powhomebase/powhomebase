@@ -18,6 +18,8 @@
 #include <stm32l4xx_ll_tim.h>
 #elif defined(STM32WL)
 #include <stm32wlxx_ll_tim.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_ll_tim.h>
 #endif
 
 /* Project Related */
@@ -29,18 +31,18 @@
 /* Interface Virtual Method Declarations                                                                              */
 /**********************************************************************************************************************/
 
-static int32_t  initialize(hw_timer_manager_t *p_this, hw_timer_event_cb_t callback, void *arg);
-static int32_t  uninitialize(hw_timer_manager_t *p_this);
-static int32_t  power_control(hw_timer_manager_t *p_this, ARM_POWER_STATE state);
-static uint32_t get_steps_current(hw_timer_manager_t *p_this);
-static bool     is_overflow_pending(hw_timer_manager_t *p_this);
+static int32_t  initialize(hw_timer_manager_t* p_this, hw_timer_event_cb_t callback, void* arg);
+static int32_t  uninitialize(hw_timer_manager_t* p_this);
+static int32_t  power_control(hw_timer_manager_t* p_this, ARM_POWER_STATE state);
+static uint32_t get_steps_current(hw_timer_manager_t* p_this);
+static bool     is_overflow_pending(hw_timer_manager_t* p_this);
 
 /**********************************************************************************************************************/
 /* Private Function Declarations                                                                                      */
 /**********************************************************************************************************************/
 
 /* Get Timer's source clock frequency */
-__STATIC_INLINE uint32_t get_src_clk_freq(hw_timer_manager_impl_t *p_this);
+__STATIC_INLINE uint32_t get_src_clk_freq(hw_timer_manager_impl_t* p_this);
 
 /**********************************************************************************************************************/
 /* Variables                                                                                                          */
@@ -112,9 +114,9 @@ static atomic_uint32_t flag_tim8_tim14 = 0;
  *              additionaly, many asserts are done in the parent class/at compile time, repeating them here is
  *              redundant.
  **********************************************************************************************************************/
-static int32_t initialize(hw_timer_manager_t *p_interface, hw_timer_event_cb_t callback, void *arg)
+static int32_t initialize(hw_timer_manager_t* p_interface, hw_timer_event_cb_t callback, void* arg)
 {
-    hw_timer_manager_impl_t *p_this = (hw_timer_manager_impl_t *)p_interface;
+    hw_timer_manager_impl_t* p_this = (hw_timer_manager_impl_t*)p_interface;
 
     p_this->_base._src_clk_freq = get_src_clk_freq(p_this);
     if (p_this->_base._src_clk_freq == 0)
@@ -179,9 +181,9 @@ static int32_t initialize(hw_timer_manager_t *p_interface, hw_timer_event_cb_t c
  * Return     : ARM_DRIVER return code
  * Notes      : Disables the timer and restores HW Timer to default state
  **********************************************************************************************************************/
-static int32_t uninitialize(hw_timer_manager_t *p_interface)
+static int32_t uninitialize(hw_timer_manager_t* p_interface)
 {
-    hw_timer_manager_impl_t *p_this = (hw_timer_manager_impl_t *)p_interface;
+    hw_timer_manager_impl_t* p_this = (hw_timer_manager_impl_t*)p_interface;
 
     p_this->_p_conf->nvic_disable();
 
@@ -206,9 +208,9 @@ static int32_t uninitialize(hw_timer_manager_t *p_interface)
  *              state       - desired power state
  * Return     : ARM_DRIVER return code
  **********************************************************************************************************************/
-static int32_t power_control(hw_timer_manager_t *p_interface, ARM_POWER_STATE state)
+static int32_t power_control(hw_timer_manager_t* p_interface, ARM_POWER_STATE state)
 {
-    hw_timer_manager_impl_t *p_this = (hw_timer_manager_impl_t *)p_interface;
+    hw_timer_manager_impl_t* p_this = (hw_timer_manager_impl_t*)p_interface;
 
     switch (state)
     {
@@ -245,9 +247,9 @@ static int32_t power_control(hw_timer_manager_t *p_interface, ARM_POWER_STATE st
  * Input      : p_interface - pointer to self
  * Return     : current value of counter
  **********************************************************************************************************************/
-static uint32_t get_steps_current(hw_timer_manager_t *p_interface)
+static uint32_t get_steps_current(hw_timer_manager_t* p_interface)
 {
-    hw_timer_manager_impl_t *p_this = (hw_timer_manager_impl_t *)p_interface;
+    hw_timer_manager_impl_t* p_this = (hw_timer_manager_impl_t*)p_interface;
 
     return LL_TIM_GetCounter(p_this->_p_conf->p_instance);
 }
@@ -257,9 +259,9 @@ static uint32_t get_steps_current(hw_timer_manager_t *p_interface)
  * Input      : p_interface - pointer to self
  * Return     : whether there's a pending overflow.
  **********************************************************************************************************************/
-static bool is_overflow_pending(hw_timer_manager_t *p_interface)
+static bool is_overflow_pending(hw_timer_manager_t* p_interface)
 {
-    hw_timer_manager_impl_t *p_this = (hw_timer_manager_impl_t *)p_interface;
+    hw_timer_manager_impl_t* p_this = (hw_timer_manager_impl_t*)p_interface;
 
     return LL_TIM_IsActiveFlag_UPDATE(p_this->_p_conf->p_instance)
            && LL_TIM_IsEnabledIT_UPDATE(p_this->_p_conf->p_instance);
@@ -276,11 +278,11 @@ static bool is_overflow_pending(hw_timer_manager_t *p_interface)
  * Input      : p_this - pointer to self
  * Notes      : not all events are checked, since they are not needed, add more flag checks as they are needed.
  **********************************************************************************************************************/
-void hw_timer_manager_irq(hw_timer_manager_impl_t *p_this)
+void hw_timer_manager_irq(hw_timer_manager_impl_t* p_this)
 {
     uint32_t event = 0;
 
-    TIM_TypeDef *p_instance = p_this->_p_conf->p_instance;
+    TIM_TypeDef* p_instance = p_this->_p_conf->p_instance;
 
     if (LL_TIM_IsActiveFlag_UPDATE(p_instance) && LL_TIM_IsEnabledIT_UPDATE(p_instance))
     {
@@ -344,7 +346,7 @@ void hw_timer_manager_irq(hw_timer_manager_impl_t *p_this)
  * Input      : p_this - pointer to self
  * Notes      : not all events are checked, since they are not needed, add more flag checks as they are needed.
  **********************************************************************************************************************/
-void hw_timer_manager_irq_brk(hw_timer_manager_impl_t *p_this)
+void hw_timer_manager_irq_brk(hw_timer_manager_impl_t* p_this)
 {
     ARGUMENT_UNUSED(p_this);
 }
@@ -354,11 +356,11 @@ void hw_timer_manager_irq_brk(hw_timer_manager_impl_t *p_this)
  * Input      : p_this - pointer to self
  * Notes      : not all events are checked, since they are not needed, add more flag checks as they are needed.
  **********************************************************************************************************************/
-void hw_timer_manager_irq_up(hw_timer_manager_impl_t *p_this)
+void hw_timer_manager_irq_up(hw_timer_manager_impl_t* p_this)
 {
     uint32_t event = 0;
 
-    TIM_TypeDef *p_instance = p_this->_p_conf->p_instance;
+    TIM_TypeDef* p_instance = p_this->_p_conf->p_instance;
 
     if (LL_TIM_IsActiveFlag_UPDATE(p_instance) && LL_TIM_IsEnabledIT_UPDATE(p_instance))
     {
@@ -374,7 +376,7 @@ void hw_timer_manager_irq_up(hw_timer_manager_impl_t *p_this)
  * Input      : p_this - pointer to self
  * Notes      : not all events are checked, since they are not needed, add more flag checks as they are needed.
  **********************************************************************************************************************/
-void hw_timer_manager_irq_trg_com(hw_timer_manager_impl_t *p_this)
+void hw_timer_manager_irq_trg_com(hw_timer_manager_impl_t* p_this)
 {
     ARGUMENT_UNUSED(p_this);
 }
@@ -384,11 +386,11 @@ void hw_timer_manager_irq_trg_com(hw_timer_manager_impl_t *p_this)
  * Input      : p_this - pointer to self
  * Notes      : not all events are checked, since they are not needed, add more flag checks as they are needed.
  **********************************************************************************************************************/
-void hw_timer_manager_irq_cc(hw_timer_manager_impl_t *p_this)
+void hw_timer_manager_irq_cc(hw_timer_manager_impl_t* p_this)
 {
     uint32_t event = 0;
 
-    TIM_TypeDef *p_instance = p_this->_p_conf->p_instance;
+    TIM_TypeDef* p_instance = p_this->_p_conf->p_instance;
 
     if (LL_TIM_IsActiveFlag_CC1(p_instance) && LL_TIM_IsEnabledIT_CC1(p_instance))
     {
@@ -451,7 +453,7 @@ void hw_timer_manager_irq_cc(hw_timer_manager_impl_t *p_this)
  * Return     : HW Timer's source clock frequency
  * Notes      : if the configured instance is unsupported, returns 0
  **********************************************************************************************************************/
-__STATIC_INLINE uint32_t get_src_clk_freq(hw_timer_manager_impl_t *p_this)
+__STATIC_INLINE uint32_t get_src_clk_freq(hw_timer_manager_impl_t* p_this)
 {
     RCC_ClkInitTypeDef rcc_conf  = {0};
     uint32_t           f_latency = 0;
@@ -581,6 +583,71 @@ void hw_timer_manager_nvic_disable_6(void)
 #else
 HW_TIMER_MANAGER_NVIC_CONTROL_DEFINE(6)
 #endif
+#endif
+
+#if defined(STM32U5)
+#if defined(TIM1)
+void hw_timer_manager_nvic_enable_1(void)
+{
+    NVIC_ClearPendingIRQ(TIM1_BRK_IRQn);
+    NVIC_EnableIRQ(TIM1_BRK_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM1_UP_IRQn);
+    NVIC_EnableIRQ(TIM1_UP_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM1_TRG_COM_IRQn);
+    NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM1_CC_IRQn);
+    NVIC_EnableIRQ(TIM1_CC_IRQn);
+}
+
+void hw_timer_manager_nvic_disable_1(void)
+{
+    NVIC_DisableIRQ(TIM1_BRK_IRQn);
+    NVIC_DisableIRQ(TIM1_UP_IRQn);
+    NVIC_DisableIRQ(TIM1_TRG_COM_IRQn);
+    NVIC_DisableIRQ(TIM1_CC_IRQn);
+}
+#endif
+
+#if defined(TIM8)
+void hw_timer_manager_nvic_enable_8(void)
+{
+    NVIC_ClearPendingIRQ(TIM8_BRK_IRQn);
+    NVIC_EnableIRQ(TIM8_BRK_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM8_UP_IRQn);
+    NVIC_EnableIRQ(TIM8_UP_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM8_TRG_COM_IRQn);
+    NVIC_EnableIRQ(TIM8_TRG_COM_IRQn);
+
+    NVIC_ClearPendingIRQ(TIM8_CC_IRQn);
+    NVIC_EnableIRQ(TIM8_CC_IRQn);
+}
+
+void hw_timer_manager_nvic_disable_8(void)
+{
+    NVIC_DisableIRQ(TIM8_BRK_IRQn);
+    NVIC_DisableIRQ(TIM8_UP_IRQn);
+    NVIC_DisableIRQ(TIM8_TRG_COM_IRQn);
+    NVIC_DisableIRQ(TIM8_CC_IRQn);
+}
+#endif
+
+#if defined(TIM15)
+HW_TIMER_MANAGER_NVIC_CONTROL_DEFINE(15)
+#endif
+
+#if defined(TIM16)
+HW_TIMER_MANAGER_NVIC_CONTROL_DEFINE(16)
+#endif
+
+#if defined(TIM17)
+HW_TIMER_MANAGER_NVIC_CONTROL_DEFINE(17)
+#endif
+
 #endif
 
 #if defined(STM32L4)

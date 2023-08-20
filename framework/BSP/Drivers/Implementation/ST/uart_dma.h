@@ -155,7 +155,7 @@ typedef struct {
     uint32_t       oversampling;
     uint32_t       mode;
     uint32_t       hw_control;
-#if defined(STM32WL)
+#if defined(STM32WL) || defined(STM32U5) 
     uint32_t one_bit_sampling;
     uint32_t prescaler;
 #endif

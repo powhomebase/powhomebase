@@ -307,6 +307,13 @@ static dma_user_conf_t dma_user_conf_1_5 ={
     .TransferEventMode = DMA_TCEM_BLOCK_TRANSFER,
     .Mode = DMA_NORMAL,
   },
+  .dma_linked_list_init = &(DMA_InitLinkedListTypeDef){
+    .Priority = DMA_LOW_PRIORITY_LOW_WEIGHT,
+    .LinkStepMode = DMA_LSM_FULL_EXECUTION,
+    .LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT0,
+    .TransferEventMode = DMA_TCEM_BLOCK_TRANSFER,
+    .LinkedListMode = DMA_LINKEDLIST_CIRCULAR,
+  },
   .Parent = SAI1_Block_B,
 };
 

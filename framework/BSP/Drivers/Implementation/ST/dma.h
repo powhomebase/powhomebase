@@ -124,6 +124,9 @@ typedef struct {
 #endif
     IRQn_Type                    irq;      /* DMA IRQ Handler */
     DMA_InitTypeDef const* const dma_init; /* DMA Configuration Structure definition */
+#if defined(STM32U5)
+    DMA_InitLinkedListTypeDef const* const dma_linked_list_init; /* DMA Linked List Configuration Structure definition */
+#endif
     void*                        Parent;   /* DMA parent object (NULL if not relevant) */
 #if defined(DMAMUX1)
     uint32_t const ll_mux_req;     /* DMA request - one of LL_DMAMUX_REQ_* (such as LL_DMAMUX_REQ_SUBGHZSPI_RX) */
@@ -134,6 +137,10 @@ typedef struct {
 /* DMA resources struct*/
 typedef struct {
     DMA_HandleTypeDef* dma_handle; /* DMA handle Structure definition */
+    #if defined(STM32U5)
+    DMA_NodeTypeDef dma_node;
+    DMA_QListTypeDef dma_list;
+    #endif
     dma_state_t        state;      /* Driver state */
     dma_user_conf_t*   user_conf;  /* DMA user configuration struct */
     ARM_DMA_STATUS     status;     /* DMA status */

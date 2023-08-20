@@ -10,6 +10,7 @@
 /* Libraries */
 #include <Driver_GPIO.h>
 #include <Driver_USART.h>
+#include <Driver_I2C.h>
 #include <Driver_SPI.h>
 #include <Driver_QSPI.h>
 
@@ -23,6 +24,9 @@ extern ARM_GPIO_PIN GPIO_PC11;
 
 /* UART */
 extern ARM_DRIVER_USART Driver_USART1;
+
+/* I2C */
+extern ARM_DRIVER_I2C Driver_I2C1;
 
 /* QSPI DMA */
 extern ARM_DRIVER_QSPI Driver_OSPI2;

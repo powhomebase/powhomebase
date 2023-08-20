@@ -35,6 +35,9 @@ uint32_t counter = 0;
 #define UART_BUFFER_SIZE 20
 uint8_t uart_data[UART_BUFFER_SIZE];
 
+#define I2C_BUFFER_SIZE 20
+uint8_t i2c_data[I2C_BUFFER_SIZE];
+
 #define SPI_BUFFER_SIZE 20
 uint8_t spi_data[SPI_BUFFER_SIZE];
 
@@ -79,6 +82,17 @@ static void uart_event(uint32_t event)
   }
 }
 
+static void i2c_event(uint32_t event)
+{
+  if (event == ARM_I2C_EVENT_TRANSFER_DONE)
+  {
+    uint8_t msg[] = "ARM I2C EVENT";
+    Driver_USART1.Send(msg, sizeof(msg));
+  }
+  else{
+    /* Some error */
+  }
+}
 static void spi_event(uint32_t event)
 {
   if (event == ARM_SPI_EVENT_TRANSFER_COMPLETE)
@@ -176,6 +190,10 @@ int main(void)
   Driver_USART1.Initialize(uart_event);
   Driver_USART1.PowerControl(ARM_POWER_FULL);
   Driver_USART1.Receive(uart_data,UART_BUFFER_SIZE);
+
+  Driver_I2C1.Initialize(i2c_event);
+  Driver_I2C1.PowerControl(ARM_POWER_FULL);
+  Driver_I2C1.MasterReceive(0x0, i2c_data, I2C_BUFFER_SIZE, true);
 
   Driver_SPI2.Initialize(spi_event);
   Driver_SPI2.PowerControl(ARM_POWER_FULL);

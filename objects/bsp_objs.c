@@ -10,6 +10,7 @@
 #include "bsp_objs.h"
 
 /* Libraries */
+#include <i2s_dma.h>
 #include <spi_dma.h>
 #include <ospi_dma.h>
 #include <gpio.h>
@@ -244,4 +245,71 @@ void GPDMA1_Channel1_IRQHandler(void)
 void GPDMA1_Channel0_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&DMA1_0_handle);
+}
+
+/* I2S DMA */
+
+GPIO_GENERATE_OBJECT(I2S1_SCK, GPIOF, GPIO_PIN_8);
+GPIO_GENERATE_OBJECT(I2S1_SD, GPIOF, GPIO_PIN_6);
+GPIO_GENERATE_OBJECT(I2S1_FS, GPIOF, GPIO_PIN_9);
+GPIO_GENERATE_OBJECT(I2S1_MCLK, GPIOF, GPIO_PIN_7);
+
+
+static dma_user_conf_t dma_user_conf_1_5 ={
+  .dma_instance = GPDMA1_Channel5,
+  .irq = GPDMA1_Channel5_IRQn,
+  .dma_init = &(DMA_InitTypeDef){
+    .Request = GPDMA1_REQUEST_SAI1_B,
+    .BlkHWRequest = DMA_BREQ_SINGLE_BURST,
+    .Direction = DMA_PERIPH_TO_MEMORY,
+    .SrcInc = DMA_SINC_FIXED,
+    .DestInc = DMA_DINC_FIXED,
+    .SrcDataWidth = DMA_SRC_DATAWIDTH_BYTE,
+    .DestDataWidth = DMA_DEST_DATAWIDTH_BYTE,
+    .Priority = DMA_HIGH_PRIORITY,
+    .SrcBurstLength = 1,
+    .DestBurstLength = 1,
+    .TransferAllocatedPort =  DMA_SRC_ALLOCATED_PORT0|DMA_DEST_ALLOCATED_PORT0,
+    .TransferEventMode = DMA_TCEM_BLOCK_TRANSFER,
+    .Mode = DMA_NORMAL,
+  },
+  .Parent = SAI1_Block_B,
+};
+
+DMA_GENERATE_OBJECT(1, 5, dma_user_conf_1_5);
+ 
+static i2s_dma_user_conf_t I2S1_user_conf = {
+ .init = &(SAI_InitTypeDef){
+    .AudioMode = SAI_MODEMASTER_TX,
+    .Synchro = SAI_ASYNCHRONOUS,
+    .OutputDrive = SAI_OUTPUTDRIVE_DISABLE,
+    .NoDivider = SAI_MASTERDIVIDER_ENABLE,
+    .FIFOThreshold = SAI_FIFOTHRESHOLD_EMPTY,
+    .AudioFrequency = SAI_AUDIO_FREQUENCY_16K,
+    .SynchroExt = SAI_SYNCEXT_DISABLE,
+    .MckOutput = SAI_MCK_OUTPUT_ENABLE,
+    .MonoStereoMode = SAI_STEREOMODE,
+    .CompandingMode = SAI_NOCOMPANDING,
+    .TriState = SAI_OUTPUT_NOTRELEASED,
+  },
+  .dataSize = SAI_PROTOCOL_DATASIZE_24BIT,
+  .instance = SAI1_Block_B,
+  .enable_master_clk = SAI_MCK_OUTPUT_DISABLE,
+  .num_of_slots = 2,
+  .protocol = SAI_I2S_STANDARD,
+};
+
+static  i2s_int_gpios_t I2S1_gpios_conf = {
+  .sck = &GPIO_I2S1_SCK,
+  .sd = &GPIO_I2S1_SD,
+  .fs = &GPIO_I2S1_FS,
+  .mclk = &GPIO_I2S1_MCLK,
+  .alternate_f = GPIO_AF13_SAI1,
+};
+
+SAI_I2S_DMA_GENERATE_OBJECT(1, &I2S1_gpios_conf, &I2S1_user_conf, &Driver_DMA1_5, &DMA1_5_handle, 17, 48, 2, 1);
+
+void GPDMA1_Channel5_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&DMA1_5_handle);
 }

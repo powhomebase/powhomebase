@@ -12,6 +12,7 @@
 #include <Driver_USART.h>
 #include <Driver_SPI.h>
 #include <Driver_QSPI.h>
+#include <Driver_SAI.h>
 
 /**********************************************************************************************************************/
 /* Objects                                                                                                            */
@@ -29,3 +30,6 @@ extern ARM_DRIVER_QSPI Driver_OSPI2;
 
 /* SPI DMA */
 extern ARM_DRIVER_SPI Driver_SPI2;
+
+/* I2S DMA */
+extern ARM_DRIVER_SAI Driver_I2S1;

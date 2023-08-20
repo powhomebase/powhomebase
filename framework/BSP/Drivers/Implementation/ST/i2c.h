@@ -11,7 +11,7 @@
 #include <Driver_GPIO.h>
 #include <Driver_I2C.h>
 #include <global.h>
-#include <stm32l4xx_hal.h>
+#include CMSIS_device_header
 
 /**********************************************************************************************************************/
 /* Macros                                                                                                             */

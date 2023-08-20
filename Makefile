@@ -42,6 +42,7 @@ framework/BSP/Drivers/Implementation/ST/gpio.c \
 framework/OS/Wrappers/Syscalls/syscalls.c \
 framework/BSP/Drivers/Implementation/ST/dma.c \
 framework/BSP/Drivers/Implementation/ST/spi_dma.c \
+framework/BSP/Drivers/Implementation/ST/i2c.c \
 framework/BSP/Drivers/Implementation/ST/ospi_dma.c \
 framework/BSP/Drivers/Implementation/ST/uart.c \
 framework/BSP/Drivers/Implementation/ST/uart_interrupt.c \
@@ -106,6 +107,8 @@ framework/BSP/Drivers/API \
 framework/BSP/Drivers/Implementation/ST \
 framework/BSP/MCU/CMSIS/Core \
 framework/OS/Wrappers/Syscalls \
+framework/Utils \
+framework/Utils/zephyr \
 objects \
 mocks
 

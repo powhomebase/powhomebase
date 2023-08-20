@@ -11,6 +11,7 @@
 
 /* Libraries */
 #include <spi_dma.h>
+#include <i2c.h>
 #include <ospi_dma.h>
 #include <gpio.h>
 #include <uart_interrupt.h>
@@ -60,6 +61,39 @@ static uart_int_gpios_t usart1_gpios_conf = {
 };
 
 USART_INTERRUPT_GENERATE_OBJECT(USART, 1, usart1_user_conf, usart1_gpios_conf);
+
+/* I2C */
+
+GPIO_GENERATE_OBJECT(PB6, GPIOB, GPIO_PIN_6);
+GPIO_GENERATE_OBJECT(PB9, GPIOB, GPIO_PIN_9);
+
+static i2c_int_gpios_t i2c1_gpios_conf = {
+    /* I2C SDA */
+    .sda = &GPIO_PB9,
+    .sda_conf = ARM_GPIO_CONF_MAKE(ARM_GPIO_AF_OUTPUT | ARM_GPIO_OUTPUT_TYPE_MASK, ARM_GPIO_DISABLED),
+    /* I2C SCL */
+    .scl = &GPIO_PB6,
+    .scl_conf = ARM_GPIO_CONF_MAKE(ARM_GPIO_AF_OUTPUT | ARM_GPIO_OUTPUT_TYPE_MASK, ARM_GPIO_DISABLED),
+    .alternate_f = GPIO_AF4_I2C1,
+};
+
+static i2c_user_conf_t i2c1_user_conf = {
+    /* I2C initialization struct */
+    .i2cInit = &(I2C_InitTypeDef){
+      .Timing = 0x30909DEC,
+      .OwnAddress1 = 0,
+      .AddressingMode = I2C_ADDRESSINGMODE_7BIT,
+      .DualAddressMode = I2C_DUALADDRESS_DISABLE,
+      .OwnAddress2 = 0,
+      .OwnAddress2Masks = I2C_OA2_NOMASK,
+      .GeneralCallMode = I2C_GENERALCALL_DISABLE,
+      .NoStretchMode = I2C_NOSTRETCH_DISABLE,
+    },
+    /* bus speed */
+    .bus_speed = 1000000,
+};
+
+I2C_GENERATE_OBJECT(1, i2c1_user_conf, i2c1_gpios_conf);
 
 /* QSPI DMA */
 

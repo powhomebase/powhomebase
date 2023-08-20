@@ -19,6 +19,8 @@
 #include <stm32f4xx_ll_tim.h>
 #elif defined(STM32L4)
 #include <stm32l4xx_ll_tim.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_ll_tim.h>
 #elif defined(STM32WL)
 #include <stm32wlxx_ll_tim.h>
 #else

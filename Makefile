@@ -40,12 +40,18 @@ Core/Src/main.c \
 Core/Src/stm32u5xx_it.c \
 framework/BSP/Drivers/Implementation/ST/gpio.c \
 framework/OS/Wrappers/Syscalls/syscalls.c \
+framework/BSP/Drivers/API/Timer/hw_timer_manager.c \
+framework/BSP/Drivers/API/Timer/hw_ticker.c \
 framework/BSP/Drivers/Implementation/ST/dma.c \
 framework/BSP/Drivers/Implementation/ST/spi_dma.c \
 framework/BSP/Drivers/Implementation/ST/i2c.c \
 framework/BSP/Drivers/Implementation/ST/ospi_dma.c \
 framework/BSP/Drivers/Implementation/ST/uart.c \
 framework/BSP/Drivers/Implementation/ST/uart_interrupt.c \
+framework/BSP/Drivers/Implementation/ST/Timer/lp_hw_timer_manager_impl.c \
+framework/BSP/Drivers/Implementation/ST/Timer/hw_timer_manager_impl.c \
+framework/BSP/Drivers/Implementation/ST/Timer/hw_ticker_impl.c \
+framework/BSP/Drivers/Implementation/ST/Timer/private/common.c \
 objects/bsp_objs.c \
 mocks/cmsis_os2.c
 
@@ -104,6 +110,7 @@ Drivers/CMSIS/Include \
 Core/Inc \
 framework/BSP/Drivers \
 framework/BSP/Drivers/API \
+framework/BSP/Drivers/API/Timer \
 framework/BSP/Drivers/Implementation/ST \
 framework/BSP/MCU/CMSIS/Core \
 framework/OS/Wrappers/Syscalls \

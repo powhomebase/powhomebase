@@ -23,7 +23,9 @@
 #endif
 
 /* Project Related */
+#if !defined(STM32U5)
 #include <atomic.h>
+#endif
 #include <global.h>
 #include <proj_exception.h>
 

@@ -12,6 +12,7 @@
 
 /* Project related */
 #include <assert.h>
+#include <cmsis_compiler.h>
 #include <proj_assert.h>
 #include <time_units.h>
 

@@ -437,7 +437,7 @@ __STATIC_INLINE uint32_t get_src_clk_freq(lp_hw_timer_manager_impl_t* p_this)
 #if defined(RCC_LPTIM1CLKSOURCE_MSIK)
                 case RCC_LPTIM1CLKSOURCE_MSIK:
                 {
-                    return MSIK_VALUE;
+                    return MSIRangeTable[(__HAL_RCC_GET_MSIK_RANGE() >> RCC_ICSCR1_MSIKRANGE_Pos)];
                 }
 #endif
                 default:
@@ -502,7 +502,7 @@ __STATIC_INLINE uint32_t get_src_clk_freq(lp_hw_timer_manager_impl_t* p_this)
                 }
                 case RCC_LPTIM34CLKSOURCE_MSIK:
                 {
-                    return MSIK_VALUE;
+                    return MSIRangeTable[(__HAL_RCC_GET_MSIK_RANGE() >> RCC_ICSCR1_MSIKRANGE_Pos)];
                 }
                 default:
                 {

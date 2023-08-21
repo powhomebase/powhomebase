@@ -13,7 +13,6 @@
 #include <cmsis_compiler.h>
 #include <cmsis_os2.h>
 #include <macros.h>
-#include <os.h>
 #include <proj_assert.h>
 
 /* Library headers */

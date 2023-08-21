@@ -11,7 +11,7 @@
 #include <Driver_GPIO.h>
 #include <Driver_I2C.h>
 #include <global.h>
-#include <stm32l4xx_hal.h>
+#include CMSIS_device_header
 
 /**********************************************************************************************************************/
 /* Macros                                                                                                             */
@@ -30,7 +30,7 @@
 #define MASTER true
 #define SLAVE false
 
-#define I2C_GENERATE_OBJECT(i2c_num, gpios_struct)                                                                                                                                                  \
+#define I2C_GENERATE_OBJECT(i2c_num, _user_conf, gpios_struct)                                                                                                                                      \
 extern i2c_resources_t        I2C##i2c_num##_RESOURCES;                                                                                                                                             \
 static int32_t                I2C##i2c_num##_Initialize      (ARM_I2C_SignalEvent_t cb_event)           { return i2c_Initialize (cb_event, &I2C##i2c_num##_RESOURCES); }                            \
 static int32_t                I2C##i2c_num##_Uninitialize    (void)                                     { return i2c_Uninitialize(&I2C##i2c_num##_RESOURCES); }                                     \
@@ -79,7 +79,7 @@ i2c_resources_t I2C##i2c_num##_RESOURCES = {                                    
     .clock_disable    =    disable_i2c##i2c_num##_clock,                                                                                                                                            \
     .state            =    I2C_NOT_INITIALIZED,                                                                                                                                                     \
     .master           =    MASTER,                                                                                                                                                                  \
-    .user_confs       =    &I2C##i2c_num##_USER_CONF,                                                                                                                                               \
+    .user_confs       =    &_user_conf,                                                                                                                                                             \
     .irq              =    I2C##i2c_num##_EV_IRQn,                                                                                                                                                  \
     .rcc_periph_clk   =    RCC_PERIPHCLK_I2C##i2c_num,                                                                                                                                              \
 };

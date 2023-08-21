@@ -516,13 +516,13 @@ ARM_I2C_STATUS i2c_GetStatus(i2c_resources_t* i2c_resources)
             i2c_resources->status.busy = false;
             break;
         }
-        case HAL_I2C_STATE_MASTER_BUSY_RX:
+        case HAL_I2C_STATE_BUSY_RX:
         {
             i2c_resources->status.busy      = true;
             i2c_resources->status.direction = RECEIVING_DIR;
             break;
         }
-        case HAL_I2C_STATE_MASTER_BUSY_TX:
+        case HAL_I2C_STATE_BUSY_TX:
         {
             i2c_resources->status.busy      = true;
             i2c_resources->status.direction = TRANSMITTING_DIR;

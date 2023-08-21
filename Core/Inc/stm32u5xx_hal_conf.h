@@ -56,7 +56,7 @@
 /*#define HAL_IWDG_MODULE_ENABLED */
 #define HAL_I2C_MODULE_ENABLED 
 /*#define HAL_I2S_MODULE_ENABLED */
-/*#define HAL_LPTIM_MODULE_ENABLED */
+#define HAL_LPTIM_MODULE_ENABLED
 /*#define HAL_LTDC_MODULE_ENABLED */
 /*#define HAL_NAND_MODULE_ENABLED */
 /*#define HAL_NOR_MODULE_ENABLED */
@@ -75,7 +75,7 @@
 /*#define HAL_SMBUS_MODULE_ENABLED */
 #define HAL_SPI_MODULE_ENABLED
 /*#define HAL_SRAM_MODULE_ENABLED */
-/*#define HAL_TIM_MODULE_ENABLED */
+#define HAL_TIM_MODULE_ENABLED
 /*#define HAL_TSC_MODULE_ENABLED */
 /*#define HAL_RAMCFG_MODULE_ENABLED */
 #define HAL_UART_MODULE_ENABLED
@@ -117,6 +117,13 @@
   */
 #if !defined  (MSI_VALUE)
   #define MSI_VALUE              4000000UL /*!< Value of the Internal oscillator in Hz*/
+#endif /* MSI_VALUE */
+
+/**
+  * @brief Internal Multiple Speed Kernel oscillator (MSIK) default value.
+  */
+#if !defined  (MSIK_VALUE)
+  #define MSIK_VALUE              4000000UL /*!< Value of the Internal oscillator in Hz*/
 #endif /* MSI_VALUE */
 
 /**

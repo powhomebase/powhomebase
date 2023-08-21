@@ -9,13 +9,6 @@
 /* Own Header */
 #include "lp_hw_timer_manager_impl.h"
 
-/* Libraries */
-#if defined(STM32L4)
-#include <stm32l4xx_ll_lptim.h>
-#elif defined(STM32WL)
-#include <stm32wlxx_ll_lptim.h>
-#endif
-
 /* Project Related */
 #include <global.h>
 
@@ -188,9 +181,54 @@ static int32_t power_control(hw_timer_manager_t* p_interface, ARM_POWER_STATE st
         }
         case ARM_POWER_LOW:
         {
+#if defined(STM32U5)
+/* In U5, LPTIMs 1,3,4 can wake up from stop2 */
+    if (p_this->_p_conf->p_instance == LPTIM1 )
+    {
+        if (__HAL_RCC_GET_LPTIM1_SOURCE() != RCC_LPTIM1CLKSOURCE_LSE
+                     && __HAL_RCC_GET_LPTIM1_SOURCE() != RCC_LPTIM1CLKSOURCE_LSI)
+        {
+            return ARM_DRIVER_ERROR_UNSUPPORTED;
+        }
+    }
+    else if (p_this->_p_conf->p_instance == LPTIM3 || p_this->_p_conf->p_instance == LPTIM4)
+    {
+        /* LPTIMs 3 & 4 share their source clock */
+        if (__HAL_RCC_GET_LPTIM34_SOURCE() != RCC_LPTIM34CLKSOURCE_LSE
+                     && __HAL_RCC_GET_LPTIM34_SOURCE() != RCC_LPTIM34CLKSOURCE_LSI)
+        {
+            return ARM_DRIVER_ERROR_UNSUPPORTED;
+        }   
+    }
+    else
+    {
+        return ARM_DRIVER_ERROR_UNSUPPORTED;
+    }
+
+    if (p_this->_base._state == HW_TIMER_MANAGER_STATE_RUNNING)
+    {
+        return ARM_DRIVER_OK;
+    }
+    /* Not running? start running */
+    else if (p_this->_base._state == HW_TIMER_MANAGER_STATE_INITIALIZED)
+    {
+        p_this->_p_conf->clock_enable();
+
+        LL_LPTIM_Enable(p_this->_p_conf->p_instance);
+        LL_LPTIM_StartCounter(p_this->_p_conf->p_instance, LL_LPTIM_OPERATING_MODE_CONTINUOUS);
+
+        return ARM_DRIVER_OK;
+    }
+    /* WTF? */
+    else
+    {
+        proj_assert(false);
+        return ARM_DRIVER_ERROR;
+    }
+#else
 #if defined(LPTIM1)
             /* Only LPTIM1 can continue running in low power mode */
-            if (p_this->_p_conf->p_instance != LPTIM1)
+            if (p_this->_p_conf->p_instance != LPTIM1 )
             {
                 return ARM_DRIVER_ERROR_UNSUPPORTED;
             }
@@ -225,6 +263,7 @@ static int32_t power_control(hw_timer_manager_t* p_interface, ARM_POWER_STATE st
             /* LPTIM2 doesn't run in low power modes, don't bother checking if LPTIM1 doesn't exist */
             return ARM_DRIVER_ERROR_UNSUPPORTED;
 #endif
+#endif            
         }
         case ARM_POWER_OFF:
         {
@@ -281,11 +320,19 @@ void lp_hw_timer_manager_irq(lp_hw_timer_manager_impl_t* p_this)
 
     LPTIM_TypeDef* p_instance = p_this->_p_conf->p_instance;
 
+#if defined(LPTIM_ICR_CC1CF)
+    if (LL_LPTIM_IsActiveFlag_CC1(p_instance) && LL_LPTIM_IsEnabledIT_CC1(p_instance))
+    {
+        LL_LPTIM_ClearFlag_CC1(p_instance);
+        event |= 1U << HW_TIMER_MANAGER_EVENT_SHIFT_CC1;
+    }
+#else
     if (LL_LPTIM_IsActiveFlag_CMPM(p_instance) && LL_LPTIM_IsEnabledIT_CMPM(p_instance))
     {
         LL_LPTIM_ClearFLAG_CMPM(p_instance);
         event |= 1U << HW_TIMER_MANAGER_EVENT_SHIFT_CC1;
     }
+#endif
 
     if (LL_LPTIM_IsActiveFlag_ARRM(p_instance) && LL_LPTIM_IsEnabledIT_ARRM(p_instance))
     {
@@ -305,11 +352,19 @@ void lp_hw_timer_manager_irq(lp_hw_timer_manager_impl_t* p_this)
         event |= 1U << LP_HW_TIMER_MANAGER_IMPL_EVENT_SHIFT_ARR_OK;
     }
 
+#if defined(LPTIM_ICR_CMP1OKCF)
+    if (LL_LPTIM_IsActiveFlag_CMP1OK(p_instance) && LL_LPTIM_IsEnabledIT_CMP1OK(p_instance))
+    {
+        LL_LPTIM_ClearFlag_CMP1OK(p_instance);
+        event |= 1U << LP_HW_TIMER_MANAGER_IMPL_EVENT_SHIFT_COMPARE_OK;
+    }
+#else
     if (LL_LPTIM_IsActiveFlag_CMPOK(p_instance) && LL_LPTIM_IsEnabledIT_CMPOK(p_instance))
     {
         LL_LPTIM_ClearFlag_CMPOK(p_instance);
         event |= 1U << LP_HW_TIMER_MANAGER_IMPL_EVENT_SHIFT_COMPARE_OK;
     }
+#endif
 
     if (LL_LPTIM_IsActiveFlag_UP(p_instance) && LL_LPTIM_IsEnabledIT_UP(p_instance))
     {
@@ -373,10 +428,18 @@ __STATIC_INLINE uint32_t get_src_clk_freq(lp_hw_timer_manager_impl_t* p_this)
                 {
                     return LSE_VALUE;
                 }
+#if defined(RCC_LPTIM1CLKSOURCE_PCLK1)
                 case RCC_LPTIM1CLKSOURCE_PCLK1:
                 {
                     return HAL_RCC_GetPCLK1Freq();
                 }
+#endif
+#if defined(RCC_LPTIM1CLKSOURCE_MSIK)
+                case RCC_LPTIM1CLKSOURCE_MSIK:
+                {
+                    return MSIRangeTable[(__HAL_RCC_GET_MSIK_RANGE() >> RCC_ICSCR1_MSIKRANGE_Pos)];
+                }
+#endif
                 default:
                 {
                     proj_assert(false);
@@ -407,6 +470,39 @@ __STATIC_INLINE uint32_t get_src_clk_freq(lp_hw_timer_manager_impl_t* p_this)
                 case RCC_LPTIM2CLKSOURCE_PCLK1:
                 {
                     return HAL_RCC_GetPCLK1Freq();
+                }
+                default:
+                {
+                    proj_assert(false);
+                    return 0;
+                }
+            }
+        }
+#endif
+#if defined(STM32U5)
+        /* LPTIMs 3 & 4 share their source clock */
+        case (uint32_t)LPTIM3:
+        case (uint32_t)LPTIM4:
+        {
+            uint32_t tim_clk_src = __HAL_RCC_GET_LPTIM34_SOURCE();
+
+            switch (tim_clk_src)
+            {
+                case RCC_LPTIM34CLKSOURCE_HSI:
+                {
+                    return HSI_VALUE;
+                }
+                case RCC_LPTIM34CLKSOURCE_LSI:
+                {
+                    return LSI_VALUE;
+                }
+                case RCC_LPTIM34CLKSOURCE_LSE:
+                {
+                    return LSE_VALUE;
+                }
+                case RCC_LPTIM34CLKSOURCE_MSIK:
+                {
+                    return MSIRangeTable[(__HAL_RCC_GET_MSIK_RANGE() >> RCC_ICSCR1_MSIKRANGE_Pos)];
                 }
                 default:
                 {

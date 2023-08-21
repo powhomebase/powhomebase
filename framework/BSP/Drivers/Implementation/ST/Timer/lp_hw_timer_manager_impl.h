@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Description: Header file of Low-Power HW Timer Manager for STM32L4 and STM32WL55.
+ * Description: Header file of Low-Power HW Timer Manager for STM32L4, STM32U5 and STM32WL55.
  **********************************************************************************************************************/
 #pragma once
 
@@ -16,6 +16,8 @@
 #include <assert.h>
 #if defined(STM32L4)
 #include <stm32l4xx_ll_lptim.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_ll_lptim.h>
 #elif defined(STM32WL)
 #include <stm32wlxx_ll_lptim.h>
 #endif
@@ -29,14 +31,14 @@
 
 #define LP_HW_TIMER_MANAGER_CLOCK_CONTROL_DECLARE(num_)                                                                \
                                                                                                                        \
-    static_assert(num_ == 1 || num_ == 2, "LPTIM" #num_ " doesn't exist.");                                            \
+    static_assert(IS_LPTIM_INSTANCE(LPTIM##num_), "LPTIM" #num_ " does not exist.");                                   \
                                                                                                                        \
     void lp_hw_timer_manager_clock_enable_##num_(void);                                                                \
     void lp_hw_timer_manager_clock_disable_##num_(void)
 
 #define LP_HW_TIMER_MANAGER_CLOCK_CONTROL_DEFINE(num_)                                                                 \
                                                                                                                        \
-    static_assert(num_ == 1 || num_ == 2, "LPTIM" #num_ " doesn't exist.");                                            \
+    static_assert(IS_LPTIM_INSTANCE(LPTIM##num_), "LPTIM" #num_ " does not exist.");                                   \
                                                                                                                        \
     void lp_hw_timer_manager_clock_enable_##num_(void)                                                                 \
     {                                                                                                                  \
@@ -63,7 +65,7 @@
  **********************************************************************************************************************/
 #define LP_HW_TIMER_MANAGER_GENERATE_OBJECT(num_, step_time_ns_, steps_per_period_)                                    \
                                                                                                                        \
-    static_assert(num_ == 1 || num_ == 2, "LPTIM" #num_ " doesn't exist.");                                            \
+    static_assert(IS_LPTIM_INSTANCE(LPTIM##num_), "LPTIM" #num_ " does not exist.");                                   \
                                                                                                                        \
     static_assert(step_time_ns_ > 0, "Counter step time must be larger than 0.");                                      \
                                                                                                                        \

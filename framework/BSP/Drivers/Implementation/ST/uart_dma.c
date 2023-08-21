@@ -22,12 +22,23 @@
 #elif defined(STM32L4)
 #include <stm32l4xx_ll_rcc.h>
 #include <stm32l4xx_ll_usart.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_ll_rcc.h>
+#include <stm32u5xx_ll_usart.h>
 #elif defined(STM32WL)
 #include <stm32wlxx_ll_rcc.h>
 #include <stm32wlxx_ll_usart.h>
 #endif
 #include <string.h>
 #include <syscalls.h>
+
+/**********************************************************************************************************************/
+/* Macros                                                                                                             */
+/**********************************************************************************************************************/
+
+#ifndef DMA_CIRCULAR
+#define DMA_CIRCULAR DMA_LINKEDLIST_CIRCULAR
+#endif
 
 /**********************************************************************************************************************/
 /* Private Functions                                                                                                  */
@@ -457,7 +468,7 @@ int32_t uart_dma_control(uart_dma_resources_t* p_this, uint32_t control, uint32_
             LL_USART_SetBaudRate(p_this->p_user_conf->instance, freq, arg);
 #elif defined(STM32F4) || defined(STM32L4)
             LL_USART_SetBaudRate(p_this->p_user_conf->instance, freq, p_this->p_user_conf->oversampling, arg);
-#elif defined(STM32WL)
+#elif defined(STM32WL) || defined(STM32U5)
             LL_USART_SetBaudRate(p_this->p_user_conf->instance,
                                  freq,
                                  p_this->p_user_conf->prescaler,

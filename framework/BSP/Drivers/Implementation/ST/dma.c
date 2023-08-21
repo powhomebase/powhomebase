@@ -66,10 +66,7 @@ int32_t dma_Initialize(dma_resources_t* p_this, ARM_DMA_SignalEvent_t cb_event)
         p_this->block2_sem = osSemaphoreNew(DMA2_MAX_SEMAPHORE_VALUE, DMA2_MAX_SEMAPHORE_VALUE, &p_this->block2_sem_attr);
         proj_assert(p_this->block2_sem != NULL);
     }
-
-    /* Prepare the DMA_HandleTypeDef struct for HAL_DMA_Init() */
-    p_this->dma_handle->Init = *(p_this->user_conf->dma_init);
-
+    
     p_this->dma_handle->Instance = p_this->user_conf->dma_instance;
 
     /* If dma is being used by other peripheral (such as SPI) we need to register it to the dma as a parent */
@@ -80,11 +77,39 @@ int32_t dma_Initialize(dma_resources_t* p_this, ARM_DMA_SignalEvent_t cb_event)
 
     dma_clock_enable(p_this);
 
-    /* For a given stream / channel, program the required configuration through the following parameters:
-    Channel request, Transfer Direction, Source and Destination data formats,
-    Circular or Normal mode, Stream / Channel Priority level, Source and Destination Increment mode
-    using HAL_DMA_Init() function. */
-    HAL_DMA_Init(p_this->dma_handle);
+    #if defined(STM32U5)
+    if (p_this->user_conf->dma_linked_list_init != NULL)
+    {
+        /* If dma_linked_list_init struct is not NULL -> we are in Linked List mode */
+        DMA_NodeConfTypeDef dma_node_config = {
+            .NodeType = (p_this->block_num == DMA_BLOCK_DMA1) ? DMA_GPDMA_LINEAR_NODE : DMA_LPDMA_LINEAR_NODE,
+            .Init = *(p_this->user_conf->dma_init),
+        };
+
+        HAL_DMAEx_List_BuildNode(&dma_node_config, &p_this->dma_node);
+
+        HAL_DMAEx_List_InsertNode(&p_this->dma_list, NULL, &p_this->dma_node);
+
+        HAL_DMAEx_List_SetCircularMode(&p_this->dma_list);
+
+        p_this->dma_handle->InitLinkedList = *(p_this->user_conf->dma_linked_list_init);
+
+        HAL_DMAEx_List_Init(p_this->dma_handle);
+
+        HAL_DMAEx_List_LinkQ(p_this->dma_handle, &p_this->dma_list);
+    }
+    else
+    #endif
+    {
+        /* Prepare the DMA_HandleTypeDef struct for HAL_DMA_Init() */
+        p_this->dma_handle->Init = *(p_this->user_conf->dma_init);
+
+        /* For a given stream / channel, program the required configuration through the following parameters:
+        Channel request, Transfer Direction, Source and Destination data formats,
+        Circular or Normal mode, Stream / Channel Priority level, Source and Destination Increment mode
+        using HAL_DMA_Init() function. */
+        HAL_DMA_Init(p_this->dma_handle);
+    }
 
 #if defined(DMAMUX1)
     LL_DMA_SetPeriphRequest(

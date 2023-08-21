@@ -1,5 +1,5 @@
 /***********************************************************************************************************************
- * Description: STM32L4 I2S (SAI).
+ * Description: STM32 I2S (SAI).
  **********************************************************************************************************************/
 
 #pragma once
@@ -12,15 +12,53 @@
 #include <Driver_DMA.h>
 #include <Driver_GPIO.h>
 #include <Driver_SAI.h>
-#include <bsp_objs.h>
 #include <global.h>
-#include <stm32l4xx.h>
+#include CMSIS_device_header
 
 /**********************************************************************************************************************/
 /* Macros                                                                                                             */
 /**********************************************************************************************************************/
 
-#define SAI_I2S_DMA_GENERATE_OBJECT(i2s_num, dma_driver, dma_handle, PLL_N, PLL_P, pll_num, sai_periph_num)            \
+#if defined(STM32L4)
+#define SAI_I2S_GENERATE_RCC_PERIPH_INIT_STRUCT(i2s_num, PLL_N, PLL_P, pll_num, sai_periph_num) \
+    RCC_PeriphCLKInitTypeDef RCC_PeriphCLKInitStruct##i2s_num = {                                                      \
+        .PeriphClockSelection = RCC_PERIPHCLK_SAI##sai_periph_num,                                                     \
+        .PLLSAI##pll_num =                                                                                             \
+            {                                                                                                          \
+                .PLLSAI##pll_num##Source   = RCC_PLLCFGR_PLLSRC_MSI,                                                   \
+                .PLLSAI##pll_num##M        = 1,                                                                        \
+                .PLLSAI##pll_num##N        = PLL_N,                                                                    \
+                .PLLSAI##pll_num##P        = PLL_P,                                                                    \
+                .PLLSAI##pll_num##ClockOut = RCC_PLLSAI##pll_num##_SAI##pll_num##CLK,                                  \
+            },                                                                                                         \
+        .Sai##sai_periph_num##ClockSelection = RCC_SAI##sai_periph_num##CLKSOURCE_PLLSAI##pll_num,                     \
+    }
+#elif defined(STM32U5)
+#define SAI_I2S_GENERATE_RCC_PERIPH_INIT_STRUCT(i2s_num, PLL_N, PLL_P, pll_num, sai_periph_num) \
+    RCC_PeriphCLKInitTypeDef RCC_PeriphCLKInitStruct##i2s_num = {                                                      \
+        .PeriphClockSelection = RCC_PERIPHCLK_SAI##sai_periph_num,                                                     \
+        .PLL##pll_num =                                                                                                \
+            {                                                                                                          \
+                .PLL##pll_num##Source   = RCC_PLLSOURCE_MSI     ,                                                      \
+                .PLL##pll_num##M        = 1,                                                                           \
+                .PLL##pll_num##N        = PLL_N,                                                                       \
+                .PLL##pll_num##P        = PLL_P,                                                                       \
+                .PLL##pll_num##ClockOut = RCC_PLL##pll_num##_DIVP,                                                     \
+            },                                                                                                         \
+        .Sai##sai_periph_num##ClockSelection = RCC_SAI##sai_periph_num##CLKSOURCE_PLL##pll_num,                        \
+    }
+#endif
+
+#define SAI_I2S_DMA_GENERATE_OBJECT(i2s_num,                                                                           \
+                                    _gpios_conf,                                                                       \
+                                    _user_conf,                                                                        \
+                                    dma_driver,                                                                        \
+                                    dma_handle,                                                                        \
+                                    PLL_N,                                                                             \
+                                    PLL_P,                                                                             \
+                                    pll_num,                                                                           \
+                                    sai_periph_num)                                                                    \
+                                                                                                                       \
     extern i2s_dma_resources_t SAI_I2S##i2s_num##_RESOURCES;                                                           \
                                                                                                                        \
     static int32_t SAI_I2S##i2s_num##_Initialize(ARM_SAI_SignalEvent_t cb_event)                                       \
@@ -74,31 +112,12 @@
         .GetStatus       = SAI_I2S##i2s_num##_GetStatus,                                                               \
     };                                                                                                                 \
                                                                                                                        \
-    RCC_PeriphCLKInitTypeDef RCC_PeriphCLKInitStruct##i2s_num = {                                                      \
-        .PeriphClockSelection = RCC_PERIPHCLK_SAI##sai_periph_num,                                                     \
-        .PLLSAI##pll_num =                                                                                             \
-            {                                                                                                          \
-                .PLLSAI##pll_num##Source   = RCC_PLLCFGR_PLLSRC_MSI,                                                   \
-                .PLLSAI##pll_num##M        = 1,                                                                        \
-                .PLLSAI##pll_num##N        = PLL_N,                                                                    \
-                .PLLSAI##pll_num##P        = PLL_P,                                                                    \
-                .PLLSAI##pll_num##ClockOut = RCC_PLLSAI##pll_num##_SAI##pll_num##CLK,                                  \
-            },                                                                                                         \
-        .Sai##sai_periph_num##ClockSelection = RCC_SAI##sai_periph_num##CLKSOURCE_PLLSAI##pll_num,                     \
-    };                                                                                                                 \
-                                                                                                                       \
-    i2s_int_gpios_t I2S##i2s_num##_GPIOS = {                                                                           \
-        &GPIO_I2S##i2s_num##_SCK,                                                                                      \
-        &GPIO_I2S##i2s_num##_SD,                                                                                       \
-        &GPIO_I2S##i2s_num##_FS,                                                                                       \
-        &GPIO_I2S##i2s_num##_MCLK,                                                                                     \
-        GPIO_AF13_SAI##sai_periph_num,                                                                                 \
-    };                                                                                                                 \
+    SAI_I2S_GENERATE_RCC_PERIPH_INIT_STRUCT(i2s_num, PLL_N, PLL_P, pll_num, sai_periph_num);                           \
                                                                                                                        \
     i2s_dma_resources_t SAI_I2S##i2s_num##_RESOURCES = {                                                               \
         .state                       = SAI_I2S_NOT_INITIALIZED,                                                        \
-        .gpios                       = &I2S##i2s_num##_GPIOS,                                                          \
-        .user_conf                   = &I2S##i2s_num##_USER_CONF,                                                      \
+        .gpios                       = _gpios_conf,                                                                    \
+        .user_conf                   = _user_conf,                                                                     \
         .dma                         = dma_driver,                                                                     \
         .hdma                        = dma_handle,                                                                     \
         .RCC_PeriphCLKInitStruct_sai = &RCC_PeriphCLKInitStruct##i2s_num,                                              \

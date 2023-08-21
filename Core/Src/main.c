@@ -41,6 +41,8 @@ uint8_t i2c_data[I2C_BUFFER_SIZE];
 #define SPI_BUFFER_SIZE 20
 uint8_t spi_data[SPI_BUFFER_SIZE];
 
+#define I2S_BUFFER_SIZE 20
+uint8_t i2s_data[I2S_BUFFER_SIZE];
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -115,6 +117,21 @@ static void qspi_event(uint32_t event)
   }
 }
 
+static void i2s_event(uint32_t event)
+{
+  if (event == ARM_SAI_EVENT_SEND_COMPLETE || event == ARM_SAI_EVENT_RECEIVE_COMPLETE)
+  {
+    uint8_t msg[] = "ARM I2S EVENT";
+    Driver_USART1.Send(msg, sizeof(msg));
+  }
+  else{
+    uint8_t msg[] = "ARM I2S EVENT ERROR";
+    Driver_USART1.Send(msg, sizeof(msg));
+  }
+}
+
+
+
 static void gpio_games(void)
 {
   gpio_control(&GPIO_PC10, ARM_GPIO_CONFIGURE_STATE, ARM_GPIO_CONF_MAKE(ARM_GPIO_OUTPUT | ARM_GPIO_OUTPUT_PUSH_PULL, ARM_GPIO_DISABLED));
@@ -184,8 +201,9 @@ int main(void)
   Driver_OSPI2.Initialize(qspi_event);
   Driver_OSPI2.PowerControl(ARM_POWER_FULL);
 
-  // Driver_SPI2.???
-  // Driver_OSPI2.SendCommand()
+  Driver_I2S1.Initialize(i2s_event);
+  Driver_I2S1.PowerControl(ARM_POWER_FULL);
+  Driver_I2S1.Receive(i2s_data, I2S_BUFFER_SIZE);
 
   while (1)
   {

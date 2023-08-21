@@ -1,6 +1,6 @@
 /***********************************************************************************************************************
- * Description: STM32L4 I2S (SAI).
- *              I2S using DMA interafce implementation for ST STM32L4.
+ * Description: STM32 I2S (SAI).
+ *              I2S using DMA interafce implementation for STM32.
  *              To use this you should:
  *                  - generate 4 GPIOs: I2S1_SCK, I2S1_SD, I2S1_FS, I2S1_MCLK (master clk is optional, but must
  *                    have this object initialized. you can enable this feature in the sai user config object)

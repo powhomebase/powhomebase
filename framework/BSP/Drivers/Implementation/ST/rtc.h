@@ -60,10 +60,8 @@
     {                                                                                                                  \
         return rtc_remove_alarm(&RTC_RESOURCES, alarm);                                                                \
     }                                                                                                                  \
-    void RTC_Alarm_IRQHandler(void)                                                                                    \
-    {                                                                                                                  \
-        HAL_RTC_AlarmIRQHandler(&RTC_RESOURCES.rtc_handler);                                                           \
-    }                                                                                                                  \
+                                                                                                                       \
+    RTC_IRQ_HANDLER();                                                                                                 \
                                                                                                                        \
     ARM_DRIVER_RTC Driver_RTC = {                                                                                      \
         .Initialize   = RTC_Initialize,                                                                                \
@@ -87,6 +85,19 @@
         .state  = RTC_STATE_UNINITIALIZED,                                                                             \
     };
 
+#if defined(STM32L4)
+#define RTC_IRQ_HANDLER()                                                                                              \
+    void RTC_Alarm_IRQHandler(void)                                                                                    \
+    {                                                                                                                  \
+        HAL_RTC_AlarmIRQHandler(&RTC_RESOURCES.rtc_handler);                                                           \
+    }   
+#elif defined(STM32U5)
+#define RTC_IRQ_HANDLER()                                                                                              \
+    void RTC_IRQHandler(void)                                                                                          \
+    {                                                                                                                  \
+        HAL_RTC_AlarmIRQHandler(&RTC_RESOURCES.rtc_handler);                                                           \
+    }   
+#endif
 /**********************************************************************************************************************/
 /* Typedefs                                                                                                           */
 /**********************************************************************************************************************/

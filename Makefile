@@ -47,6 +47,7 @@ framework/BSP/Drivers/Implementation/ST/spi_dma.c \
 framework/BSP/Drivers/Implementation/ST/i2c.c \
 framework/BSP/Drivers/Implementation/ST/i2s_dma.c \
 framework/BSP/Drivers/Implementation/ST/ospi_dma.c \
+framework/BSP/Drivers/Implementation/ST/rtc.c \
 framework/BSP/Drivers/Implementation/ST/uart.c \
 framework/BSP/Drivers/Implementation/ST/uart_interrupt.c \
 framework/BSP/Drivers/Implementation/ST/Timer/lp_hw_timer_manager_impl.c \

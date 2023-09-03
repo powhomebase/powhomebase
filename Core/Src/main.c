@@ -210,8 +210,8 @@ int main(void)
   Driver_Flash.PowerControl(ARM_POWER_FULL);
 
   uint8_t data1[16] = "Hello U5!";
-  uint8_t data2[16];
-  uint8_t data3[16];
+  uint8_t data2[16] = {0};
+  uint8_t data3[16] = {0};
   Driver_Flash.ProgramData(FLASH_BASE + FLASH_BANK_SIZE, data1, 16);
   Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data2, 16);
 
@@ -300,6 +300,10 @@ static void SystemPower_Config(void)
     Error_Handler();
   }
 
+  if (HAL_ICACHE_DeInit() != HAL_OK)
+  {
+    Error_Handler();
+  }
   if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
   {
     Error_Handler();

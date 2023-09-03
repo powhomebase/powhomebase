@@ -279,7 +279,6 @@ int32_t internal_flash_ReadData(uint32_t addr, void* data, uint32_t cnt)
 
     uint32_t read_bytes_count = cnt;
 
-// TODO: check if this code is valid for U5
 #if defined(STM32L4) || defined(STM32U5)
     /* Get defected double word address if there was a defected one */
     void* defect_address = get_eccd_error_address();

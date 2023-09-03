@@ -16,6 +16,7 @@
 #include <faults.h>
 #include <logging.h>
 #include <proj_exception.h>
+#include <string.h>
 #include <syscalls.h>
 #if defined(STM32F1)
 #include <stm32f1xx_hal_flash.h>
@@ -26,6 +27,8 @@
 #include <stm32l4xx_hal_flash.h>
 #elif defined(STM32WL)
 #include <stm32wlxx_hal_flash.h>
+#elif defined(STM32U5)
+#include <stm32u5xx_hal_flash.h>
 #else
 #error "Unsupported device"
 #endif
@@ -35,28 +38,33 @@
 /**********************************************************************************************************************/
 
 #if defined(FLASH_TYPEPROGRAM_BYTE) && IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_BYTE)
-#define PROGRAM_UNIT 1
+#define PROGRAM_UNIT_BYTES 1
 #define PROGRAM_TYPE FLASH_TYPEPROGRAM_BYTE
 typedef uint8_t program_unit_t;
-
-
 #elif defined(FLASH_TYPEPROGRAM_HALFWORD) && IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_HALFWORD)
-#define PROGRAM_UNIT 2
+#define PROGRAM_UNIT_BYTES 2
 #define PROGRAM_TYPE FLASH_TYPEPROGRAM_HALFWORD
 typedef uint16_t program_unit_t;
-
 #elif defined(FLASH_TYPEPROGRAM_WORD) && IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_WORD)
-#define PROGRAM_UNIT 4
+#define PROGRAM_UNIT_BYTES 4
 #define PROGRAM_TYPE FLASH_TYPEPROGRAM_WORD
 typedef uint32_t program_unit_t;
-
-#elif IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_DOUBLEWORD)
-#define PROGRAM_UNIT 8
+#elif defined(FLASH_TYPEPROGRAM_DOUBLEWORD) && IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_DOUBLEWORD)
+#define PROGRAM_UNIT_BYTES (2 * 4)
 #define PROGRAM_TYPE FLASH_TYPEPROGRAM_DOUBLEWORD
 typedef uint64_t program_unit_t;
+#elif defined(FLASH_TYPEPROGRAM_QUADWORD) && IS_FLASH_TYPEPROGRAM(FLASH_TYPEPROGRAM_QUADWORD)
+#define PROGRAM_UNIT_BYTES (4 * 4)
+#define PROGRAM_TYPE FLASH_TYPEPROGRAM_QUADWORD
+typedef struct {
+    uint64_t lsb;
+    uint64_t msb;
+} program_unit_t;
 #endif
 
-#if defined(FLASH_BANK1_END)
+#if defined(FLASH_BANK_SIZE)
+#define BANK_SIZE FLASH_BANK_SIZE
+#elif defined(FLASH_BANK1_END)
 #define BANK_SIZE (FLASH_BANK1_END - FLASH_BASE)
 #else
 #define BANK_SIZE CONFIG_FLASH_SIZE
@@ -93,16 +101,16 @@ typedef struct {
     osMutexId_t             flash_mutex_id; /* Flash mutex ID */
     ARM_FLASH_STATUS        status;         /* Flash driver status */
     ARM_Flash_SignalEvent_t callback;       /* Callback function */
-#if defined(STM32L4)
+#if defined(STM32L4) || defined(STM32U5)
     void* eccd_addr; /* ECCD address */
-#endif               /* STM32L4 */
+#endif
 } internal_flash_resources_t;
 
 /**********************************************************************************************************************/
 /* Private Function Declarations                                                                                      */
 /**********************************************************************************************************************/
 
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5)
 static uint32_t get_page_num(uint32_t addr);
 #endif
 
@@ -110,10 +118,10 @@ static uint32_t get_page_num(uint32_t addr);
 static uint32_t get_bank(uint32_t addr);
 #endif
 
-#if defined(STM32L4)
+#if defined(STM32L4) || defined(STM32U5)
 static void* get_eccd_error_address(void);
 static bool  nmi_handler(void* arg);
-#endif /* STM32L4 */
+#endif
 
 /**********************************************************************************************************************/
 /* Variables                                                                                                          */
@@ -123,13 +131,13 @@ static internal_flash_conf_t internal_flash_conf = {
     .info =
         {
             .sector_info  = NULL,                                  /* All sectors are of equal size - no map needed */
-            .sector_count = (CONFIG_FLASH_SIZE / FLASH_PAGE_SIZE), /* Number of sectors/pages */
+            .sector_count = (0x200000 / FLASH_PAGE_SIZE), /* Number of sectors/pages */
             .sector_size  = FLASH_PAGE_SIZE,
             .page_size    = FLASH_PAGE_SIZE,
-            .program_unit = PROGRAM_UNIT, /* Single Programming unit size in bytes */
+            .program_unit = PROGRAM_UNIT_BYTES, /* Single Programming unit size in bytes */
             .erased_value = ERASED_VALUE, /* Erase value */
         },
-    .mutex_attr = OS_ATTR_STATIC_MUTEX_CREATE(Internal Flash, osMutexRecursive),
+    .mutex_attr = OS_ATTR_STATIC_MUTEX_CREATE(Internal_Flash, osMutexRecursive),
 };
 
 /* internal flash object resources initialization */
@@ -141,9 +149,9 @@ static internal_flash_resources_t this = {
             .busy  = false,
             .error = false,
         },
-#if defined(STM32L4)
+#if defined(STM32L4) || defined(STM32U5)
     .eccd_addr = NULL,
-#endif /* STM32L4 */
+#endif
 };
 
 /**********************************************************************************************************************/
@@ -174,9 +182,9 @@ int32_t internal_flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 
     this.status.error = false;
 
-#if defined(STM32L4)
-    faults_nmi_add_handler(nmi_handler, NULL);
-#endif /* STM32L4 */
+#if defined(STM32L4) || defined(STM32U5)
+    // faults_nmi_add_handler(nmi_handler, NULL);
+#endif
 
     this.state = INTFLASH_INITIALIZED;
 
@@ -271,7 +279,7 @@ int32_t internal_flash_ReadData(uint32_t addr, void* data, uint32_t cnt)
 
     uint32_t read_bytes_count = cnt;
 
-#if defined(STM32L4)
+#if defined(STM32L4) || defined(STM32U5)
     /* Get defected double word address if there was a defected one */
     void* defect_address = get_eccd_error_address();
 
@@ -285,8 +293,11 @@ int32_t internal_flash_ReadData(uint32_t addr, void* data, uint32_t cnt)
         HAL_FLASH_Unlock();
 
         /* Write zeros to the defective double word */
-        HAL_StatusTypeDef result =
-            HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)defect_address, (uint64_t)0);
+#if defined(STM32U5)
+        HAL_StatusTypeDef result = HAL_FLASH_Program(PROGRAM_TYPE, (uint32_t)defect_address, (uint32_t)&(program_unit_t){0});
+#else
+        HAL_StatusTypeDef result = HAL_FLASH_Program(PROGRAM_TYPE, (uint32_t)defect_address, (program_unit_t)0);
+#endif
 
         /* Lock Flash */
         HAL_FLASH_Lock();
@@ -313,7 +324,7 @@ int32_t internal_flash_ReadData(uint32_t addr, void* data, uint32_t cnt)
         /* Get defected double word address if there was a defected one */
         defect_address = get_eccd_error_address();
     }
-#endif /* STM32L4 */
+#endif
 
     this.status.busy = false;
 
@@ -335,9 +346,9 @@ int32_t internal_flash_ReadData(uint32_t addr, void* data, uint32_t cnt)
 int32_t internal_flash_ProgramData(uint32_t addr, const void* data, uint32_t cnt)
 {
     /* Assert that the data address is a multiple of the programming unit */
-    proj_assert((addr & (PROGRAM_UNIT - 1)) == 0);
+    proj_assert((addr & (PROGRAM_UNIT_BYTES - 1)) == 0);
     /* Assert that the data size is a multiple of the programming unit */
-    proj_assert((cnt & (PROGRAM_UNIT - 1)) == 0);
+    proj_assert((cnt & (PROGRAM_UNIT_BYTES - 1)) == 0);
     /* Assert that the input pointer is 4B aligned - FIXME: is this necessary? */
     proj_assert(((uint32_t)data & 0x3) == 0);
 
@@ -362,8 +373,13 @@ int32_t internal_flash_ProgramData(uint32_t addr, const void* data, uint32_t cnt
     /* Write to Flash using blocking mode */
     while (programmed_bytes_count < cnt)
     {
-        /* Write program unit to the correct position according to the address given  */
+        /* Write program unit to the correct position according to the address given  
+           for STM32U5 we need the data address as argument while others need the data itself */
+#if defined(STM32U5)
+        HAL_StatusTypeDef result = HAL_FLASH_Program(PROGRAM_TYPE, addr, (uint32_t)(p_data_unit++));
+#else
         HAL_StatusTypeDef result = HAL_FLASH_Program(PROGRAM_TYPE, addr, *(p_data_unit++));
+#endif
 
         /* set error return value and break in case of failure */
         if (result != HAL_OK)
@@ -376,8 +392,8 @@ int32_t internal_flash_ProgramData(uint32_t addr, const void* data, uint32_t cnt
         }
 
         /* Update write counters */
-        addr += PROGRAM_UNIT;
-        programmed_bytes_count += PROGRAM_UNIT;
+        addr += PROGRAM_UNIT_BYTES;
+        programmed_bytes_count += PROGRAM_UNIT_BYTES;
     }
 
     HAL_FLASH_Lock();
@@ -431,7 +447,7 @@ int32_t internal_flash_EraseSector(uint32_t addr)
 #else
         .TypeErase = FLASH_TYPEERASE_PAGES,
 
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5)
         .Page      = get_page_num(addr),
 #elif defined(STM32F1)
         .PageAddress = addr,
@@ -510,7 +526,7 @@ ARM_FLASH_INFO* internal_flash_GetInfo(void)
 /* Private function implementation                                                                                    */
 /**********************************************************************************************************************/
 
-#if defined(STM32L4) || defined(STM32WL)
+#if defined(STM32L4) || defined(STM32WL) || defined(STM32U5)
 /***********************************************************************************************************************
  * Description: Calculates in which page the address is located.
  * Input      : addr - address whose page to calculate
@@ -518,22 +534,11 @@ ARM_FLASH_INFO* internal_flash_GetInfo(void)
  **********************************************************************************************************************/
 static uint32_t get_page_num(uint32_t addr)
 {
-    uint32_t page = 0;
-
-    if (addr < (FLASH_BASE + BANK_SIZE))
-    {
-        /* Bank 1 */
-        page = (addr - FLASH_BASE) / FLASH_PAGE_SIZE;
-    }
-    else
-    {
-        /* Bank 2 */
-        page = (addr - (FLASH_BASE + BANK_SIZE)) / FLASH_PAGE_SIZE;
-    }
-
-    return page;
+    bool is_first_bank = addr < (FLASH_BASE + BANK_SIZE);
+    uint32_t bank_base = is_first_bank ? FLASH_BASE : (FLASH_BASE + BANK_SIZE);
+    return (addr - bank_base) / FLASH_PAGE_SIZE;
 }
-#endif /* STM32L4 || STM32WL */
+#endif /* STM32L4 || STM32WL || STM32U5 */
 
 #if (defined(FLASH_BANK_1) || defined(FLASH_BANK_2)) && !defined(STM32F4)
 /***********************************************************************************************************************
@@ -544,34 +549,17 @@ static uint32_t get_page_num(uint32_t addr)
 static uint32_t get_bank(uint32_t addr)
 {
 #if defined(FLASH_BANK_2)
-    uint32_t bank = 0;
 
-    if (READ_BIT(SYSCFG->MEMRMP, SYSCFG_MEMRMP_FB_MODE) == 0)
-    {
-        /* No Bank swap */
-        if (addr < (FLASH_BASE + FLASH_BANK_SIZE))
-        {
-            bank = FLASH_BANK_1;
-        }
-        else
-        {
-            bank = FLASH_BANK_2;
-        }
-    }
-    else
-    {
-        /* Bank swap */
-        if (addr < (FLASH_BASE + FLASH_BANK_SIZE))
-        {
-            bank = FLASH_BANK_2;
-        }
-        else
-        {
-            bank = FLASH_BANK_1;
-        }
-    }
+#if defined(STM32U5)
+    bool are_banks_swapped = (READ_BIT(FLASH->OPTR, FLASH_OPTR_SWAP_BANK) == 1);
+#else
+    bool are_banks_swapped = (READ_BIT(SYSCFG->MEMRMP, SYSCFG_MEMRMP_FB_MODE) == 1);
+#endif
 
-    return bank;
+    bool is_first_bank = (addr < (FLASH_BASE + BANK_SIZE));
+
+    /* XORing with are_banks_swapped inverts the boolean value for swapped banks */
+    return (is_first_bank ^ are_banks_swapped) ? FLASH_BANK_1 : FLASH_BANK_2;
 #else
     ARGUMENT_UNUSED(addr);
     return FLASH_BANK_1;
@@ -579,7 +567,7 @@ static uint32_t get_bank(uint32_t addr)
 }
 #endif /* FLASH_BANK_1 || FLASH_BANK_2 */
 
-#if defined(STM32L4)
+#if defined(STM32L4) || defined(STM32U5)
 /***********************************************************************************************************************
  * Description: NMI Handler - checks if an ECCD error happened and saves the error address.
  * Input      : arg - unused
@@ -598,7 +586,7 @@ static bool nmi_handler(void* arg)
         /* Calculate the defective address according to the internal flash's ECCR register (use FLASH_ECCR_BK_ECC if
          * relevant to jump to the wanted flash bank) */
 #if defined(FLASH_ECCR_BK_ECC)
-        this.eccd_addr = (void*)(FLASH_BASE + ((FLASH->ECCR & FLASH_ECCR_BK_ECC) == FLASH_ECCR_BK_ECC) * FLASH_BANK_SIZE
+        this.eccd_addr = (void*)(FLASH_BASE + ((FLASH->ECCR & FLASH_ECCR_BK_ECC) == FLASH_ECCR_BK_ECC) * BANK_SIZE
                                  + (FLASH->ECCR & FLASH_ECCR_ADDR_ECC));
 #else
         this.eccd_addr = (void*)(FLASH_BASE + (FLASH->ECCR & FLASH_ECCR_ADDR_ECC));
@@ -627,7 +615,7 @@ static void* get_eccd_error_address(void)
     /* Return the defected address */
     return ret;
 }
-#endif /* STM32L4 */
+#endif
 
 /* -------------------------------------------------- IRQ Handlers -------------------------------------------------- */
 
@@ -650,4 +638,9 @@ void HAL_FLASH_OperationErrorCallback(uint32_t ret_val)
 
     /* Change internal state machine to error */
     this.state = INTFLASH_ERROR;
+}
+
+void NMI_Handler(void)
+{
+  nmi_handler(NULL);
 }

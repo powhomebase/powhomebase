@@ -13,7 +13,7 @@
 #include <proj_assert.h>
 #include <syscalls.h>
 #include <time_units.h>
-#include <time_utils.h>
+// #include <time_utils.h>
 
 /* Library headers */
 #include <time.h>

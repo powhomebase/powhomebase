@@ -20,6 +20,7 @@
 #include CMSIS_device_header
 #include <stdint.h>
 #include <Driver_DMA.h>
+#include <Driver_Flash.h>
 #include <Driver_GPIO.h>
 #include <Driver_USART.h>
 #include <Driver_SPI.h>
@@ -205,6 +206,25 @@ int main(void)
   Driver_I2S1.PowerControl(ARM_POWER_FULL);
   Driver_I2S1.Receive(i2s_data, I2S_BUFFER_SIZE);
 
+  Driver_Flash.Initialize(NULL);
+  Driver_Flash.PowerControl(ARM_POWER_FULL);
+
+  uint8_t data1[16] = "Hello U5!";
+  uint8_t data2[16] = {0};
+  uint8_t data3[16] = {0};
+  uint8_t data4[16] = {0};
+  Driver_Flash.ProgramData(FLASH_BASE + FLASH_BANK_SIZE, data1, 16);
+  Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data2, 16);
+
+  Driver_Flash.EraseSector(FLASH_BASE + FLASH_BANK_SIZE);
+
+  HAL_Delay(1000U);
+
+  Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data3, 16);
+  
+  /* Cause ECCD error */
+  Driver_Flash.ReadData(0x0BFA1F80, data4, 16);
+
   while (1)
   {
   
@@ -286,6 +306,10 @@ static void SystemPower_Config(void)
     Error_Handler();
   }
 
+  if (HAL_ICACHE_DeInit() != HAL_OK)
+  {
+    Error_Handler();
+  }
   if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
   {
     Error_Handler();

@@ -8,6 +8,7 @@
 /**********************************************************************************************************************/
 
 /* Libraries */
+#include <Driver_Flash.h>
 #include <Driver_GPIO.h>
 #include <Driver_USART.h>
 #include <Driver_I2C.h>
@@ -37,3 +38,6 @@ extern ARM_DRIVER_SPI Driver_SPI2;
 
 /* I2S DMA */
 extern ARM_DRIVER_SAI Driver_I2S1;
+
+/* Internal Flash */
+extern ARM_DRIVER_FLASH Driver_Flash;

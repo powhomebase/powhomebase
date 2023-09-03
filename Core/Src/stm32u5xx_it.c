@@ -24,13 +24,6 @@
 /******************************************************************************/
 /*           Cortex Processor Interruption and Exception Handlers          */
 /******************************************************************************/
-void NMI_Handler(void)
-{
-
-  while (1)
-  {
-  }
-}
 
 /**
   * @brief This function handles Hard fault interrupt.

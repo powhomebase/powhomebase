@@ -15,7 +15,7 @@
             "device": "STM32U585AI",
             // "ipAddress": "2.55.114.141",
             "gdbTarget": "localhost:50000",
-            "svdFile": "powhomebase/framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/SVD/STM32U5xx.svd"
+            "svdFile": "framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/SVD/STM32U5xx.svd"
         },
         {
             "name": "Attach",
@@ -28,7 +28,7 @@
             "device": "STM32U585AI",
             // "ipAddress": "2.55.114.141",
             "gdbTarget": "localhost:50000",
-            "svdFile": "powhomebase/framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/SVD/STM32U5xx.svd"
+            "svdFile": "framework/BSP/MCU/VendorSpecific/ST/st-hal/devices/STM32U5/SVD/STM32U5xx.svd"
         }
     ],
 }

@@ -212,12 +212,18 @@ int main(void)
   uint8_t data1[16] = "Hello U5!";
   uint8_t data2[16] = {0};
   uint8_t data3[16] = {0};
+  uint8_t data4[16] = {0};
   Driver_Flash.ProgramData(FLASH_BASE + FLASH_BANK_SIZE, data1, 16);
   Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data2, 16);
 
   Driver_Flash.EraseSector(FLASH_BASE + FLASH_BANK_SIZE);
 
+  HAL_Delay(1000U);
+
   Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data3, 16);
+  
+  /* Cause ECCD error */
+  Driver_Flash.ReadData(0x0BFA1F80, data4, 16);
 
   while (1)
   {

@@ -39,3 +39,34 @@ uint32_t osSemaphoreGetCount (osSemaphoreId_t semaphore_id)
     sem_t * p_this = semaphore_id;
     return p_this->count;
 }
+
+
+osMutexId_t osMutexNew (const osMutexAttr_t *attr)
+{
+    mutex_t * p_this = attr;
+
+    p_this->is_locked = 0;
+
+    return p_this;
+}
+
+osStatus_t osMutexAcquire (osMutexId_t mutex_id, uint32_t timeout)
+{
+    mutex_t * p_this = mutex_id;
+
+    while(p_this->is_locked == 1){
+    }
+
+    p_this->is_locked = 1;
+
+    return osOK;
+}
+
+osStatus_t osMutexRelease (osMutexId_t mutex_id)
+{
+    mutex_t * p_this = mutex_id;
+    
+    p_this->is_locked = 0;
+
+    return osOK;
+}

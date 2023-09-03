@@ -20,6 +20,7 @@
 #include CMSIS_device_header
 #include <stdint.h>
 #include <Driver_DMA.h>
+#include <Driver_Flash.h>
 #include <Driver_GPIO.h>
 #include <Driver_USART.h>
 #include <Driver_SPI.h>
@@ -204,6 +205,19 @@ int main(void)
   Driver_I2S1.Initialize(i2s_event);
   Driver_I2S1.PowerControl(ARM_POWER_FULL);
   Driver_I2S1.Receive(i2s_data, I2S_BUFFER_SIZE);
+
+  Driver_Flash.Initialize(NULL);
+  Driver_Flash.PowerControl(ARM_POWER_FULL);
+
+  uint8_t data1[16] = "Hello U5!";
+  uint8_t data2[16];
+  uint8_t data3[16];
+  Driver_Flash.ProgramData(FLASH_BASE + FLASH_BANK_SIZE, data1, 16);
+  Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data2, 16);
+
+  Driver_Flash.EraseSector(FLASH_BASE + FLASH_BANK_SIZE);
+
+  Driver_Flash.ReadData(FLASH_BASE + FLASH_BANK_SIZE, data3, 16);
 
   while (1)
   {

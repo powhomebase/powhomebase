@@ -10,6 +10,7 @@
 #include "bsp_objs.h"
 
 /* Libraries */
+#include <internal_flash.h>
 #include <i2s_dma.h>
 #include <spi_dma.h>
 #include <i2c.h>
@@ -29,6 +30,9 @@ gpio_user_conf_t gpio_conf = {
 
 GPIO_GENERATE_OBJECT(PC10, GPIOC, GPIO_PIN_10);
 GPIO_GENERATE_OBJECT(PC11, GPIOC, GPIO_PIN_11);
+
+/* Internal Flash */
+INTERNAL_FLASH_GENERATE_OBJECT();
 
 /* UART */
 uart_int_user_conf_t usart1_user_conf = {
@@ -354,3 +358,4 @@ void GPDMA1_Channel5_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&DMA1_5_handle);
 }
+

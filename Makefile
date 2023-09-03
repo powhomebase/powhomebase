@@ -46,6 +46,7 @@ framework/BSP/Drivers/Implementation/ST/dma.c \
 framework/BSP/Drivers/Implementation/ST/spi_dma.c \
 framework/BSP/Drivers/Implementation/ST/i2c.c \
 framework/BSP/Drivers/Implementation/ST/i2s_dma.c \
+framework/BSP/Drivers/Implementation/ST/internal_flash.c \
 framework/BSP/Drivers/Implementation/ST/ospi_dma.c \
 framework/BSP/Drivers/Implementation/ST/rtc.c \
 framework/BSP/Drivers/Implementation/ST/uart.c \
@@ -115,6 +116,7 @@ framework/BSP/Drivers/API \
 framework/BSP/Drivers/API/Timer \
 framework/BSP/Drivers/Implementation/ST \
 framework/BSP/MCU/CMSIS/Core \
+framework/OS/Wrappers \
 framework/OS/Wrappers/Syscalls \
 framework/Utils \
 framework/Utils/zephyr \
